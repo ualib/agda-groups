@@ -129,6 +129,11 @@ expect pragma-INJECTIVE_FOR_INFERENCE "line 12: the pragma INJECTIVE_FOR_INFEREN
 expect pragma-POLARITY      "line 12: the pragma POLARITY" "${HEAD[@]}" "" "${F}agda" "g : Set → Set" "{-# POLARITY g ++ #-}" "$F"
 expect pragma-COMPILE       "line 12: the pragma COMPILE" "${HEAD[@]}" "" "${F}agda" "g : Set → Set" "{-# COMPILE GHC g = \"postulate\" #-}" "$F"
 expect foreign-quote        "line 12: postulate" "${HEAD[@]}" "" "${F}agda" "{-# FOREIGN GHC c = '\"' #-}" "$POST" "$F"
+expect foreign-quoted-close "line 12: postulate" "${HEAD[@]}" "" "${F}agda" "{-# FOREIGN GHC s = \"#-}\" #-}" "$POST" "$F"
+expect foreign-spaced-close "line 12: postulate" "${HEAD[@]}" "" "${F}agda" "{-# FOREIGN GHC s = \"x #-}\" #-}" "$POST" "$F"
+expect foreign-glued-close  "line 12: postulate" "${HEAD[@]}" "" "${F}agda" "{-# FOREIGN GHC s = a#-}\" #-}" "$POST" "$F"
+expect foreign-word-close   "line 12: postulate" "${HEAD[@]}" "" "${F}agda" "{-# FOREIGN GHC s = a#-} \" #-}" "$POST" "$F"
+expect foreign-next-line    "line 13: postulate" "${HEAD[@]}" "" "${F}agda" "{-# FOREIGN GHC s = x" "#-}" "$POST" "$F"
 expect terminating-comment  pass "${HEAD[@]}" "" "${F}agda" "-- {-# TERMINATING #-}" "$F"
 expect safe-pragmas         pass "${HEAD[@]}" "" "${F}agda" "g : Set → Set" "g A = A" "{-# INLINE g #-}" "{-# BUILTIN LEVEL Level #-}" "$F"
 

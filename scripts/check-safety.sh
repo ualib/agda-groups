@@ -45,7 +45,10 @@
 # nested block comments ({- -}), line comments (-- at the start of a token)
 # and string and character literals, which may run over several lines and
 # hold escapes and string gaps (a backslash, whitespace, a backslash), and
-# reads pragmas ({-# #-}) whole, with the string literals in them.
+# reads pragmas ({-# #-}) whole: with the string literals in them, except
+# in a COMPILE or FOREIGN pragma, whose text Agda reads as words separated
+# by whitespace and which closes only at a word that is exactly #-} (so a
+# quoted "#-}" in its Haskell does not close it; Agda's Lexer.x, fpragma_).
 #
 # scripts/test-check-safety.sh holds the cases.  It prints each failure and
 # exits 1, or prints a one-line summary and exits 0; a directory with no
@@ -69,6 +72,10 @@ scan() {
       t = substr(text, 5)
       return match(t, /^[[:space:]]*(COMPILE|FOREIGN)([[:space:]]|$)/)
     }
+    function closes(s, i, len) {
+      if (!foreign()) return 1
+      return (i == 1 || substr(s, i - 1, 1) ~ /[[:space:]]/) && (i + 3 > len || substr(s, i + 3, 1) ~ /[[:space:]]/)
+    }
     function lex(s, n,    i, len, c, c2, c3, j, w, step) {
       len = length(s); i = 1
       while (i <= len) {
@@ -86,7 +93,7 @@ scan() {
           continue
         }
         if (inpragma) {
-          if (c3 == "#-}") {
+          if (c3 == "#-}" && closes(s, i, len)) {
             text = text "#-}"; gsub(/[[:space:]]+/, " ", text)
             print "P", pline, place, text; inpragma = 0; i += 3
           } else {
