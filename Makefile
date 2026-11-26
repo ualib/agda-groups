@@ -1,7 +1,30 @@
 # File: Makefile
 #
-# The primary UX for the plan-file workflow.  `make help` (the default)
-# lists the targets; `make populate` / `make update` are the two
+# Two jobs: checking the library, and keeping the plan.  `make help` (the
+# default) lists the targets.
+#
+# Checking the library, from the repository root inside `nix develop`, so
+# that `agda` is the wrapper that knows the pinned standard library and
+# agda-algebras (see flake.nix), as follows:
+#
+#   make check         The options check (make safety), then Agda on the
+#                      aggregator with a heap limit, then the plan's lint.
+#   make check-lean    The options check, its cases (make safety-test) and
+#                      the plan's lint, with no Agda; `nix develop .#lean`
+#                      is the shell without Agda.
+#   make safety        scripts/check-safety.sh on src/ and the library file.
+#   make safety-test   scripts/test-check-safety.sh, the check's cases.
+#   make clean         Remove this library's interface files and the
+#                      aggregator (the copy of agda-algebras under .deps/
+#                      and its interface files stay).
+#
+# The aggregator, src/EverythingGroups.agda, imports every module under
+# src/.  It is generated and gitignored, so that one run of Agda checks the
+# whole library; it is a PHONY target, always regenerated, so that a module
+# added or removed is picked up; and it is listed by `find` rather than by
+# git, so that an untracked module is checked too.
+#
+# Keeping the plan: `make populate` and `make update` are the two
 # directions of the contract stated in the README.
 #
 # The engine (gh_project_*.py) has exactly one home — the
@@ -17,6 +40,8 @@
 #   checkout  GHPROJECT_DIR points at a checkout of the engine repo
 #
 # Variables:
+#   AGDA           the agda to run      (default: the one on PATH)
+#   AGDA_OPTS      extra agda flags
 #   PLAN           plan file            (default: docs/GITHUB_PROJECT.md)
 #   REPO           owner/name override  (default: the plan file's
 #                                        **Repository**: header)
@@ -29,6 +54,13 @@
 
 PYTHON ?= python3
 PLAN   ?= docs/GITHUB_PROJECT.md
+SRCDIR := src
+AGDA   ?= agda
+AGDA_OPTS ?=
+# A heap limit of 6 GiB, as in agda-lattices: a check that needs more
+# fails rather than taking the machine.
+RTS_OPTS := +RTS -M6G -A128M -RTS
+AGGREGATOR := $(SRCDIR)/EverythingGroups.agda
 REPO   ?=
 GHPROJECT_DIR ?=
 
@@ -53,7 +85,8 @@ else
   ENGINE_MODE := missing
 endif
 
-.PHONY: help populate-dry populate update update-check lint test init \
+.PHONY: help check check-lean safety safety-test clean $(AGGREGATOR) \
+        populate-dry populate update update-check lint test init \
         guard-gh guard-engine engine-mode
 .DEFAULT_GOAL := help
 
@@ -71,6 +104,47 @@ endif
 help: ## Show this help
 	@grep -hE '^[a-zA-Z][a-zA-Z0-9_-]*:.*## ' $(MAKEFILE_LIST) \
 	  | awk 'BEGIN {FS = ":.*## "} {printf "  \033[1m%-14s\033[0m %s\n", $$1, $$2}'
+
+# -- Checking the library ------------------------------------------------
+
+check: safety $(AGGREGATOR) ## Check the options, type-check every module, then lint the plan
+	$(AGDA) $(RTS_OPTS) $(AGDA_OPTS) $(AGGREGATOR)
+	@$(MAKE) --no-print-directory lint
+
+check-lean: safety safety-test lint ## The options check, its cases and the plan's lint, with no Agda
+
+safety: ## Every module has the one pragma, no postulate and no unsafe pragma
+	bash scripts/check-safety.sh $(SRCDIR) agda-groups.agda-lib
+
+safety-test: ## Run the cases of the options check
+	bash scripts/test-check-safety.sh
+
+# `--exact-split` is absent from the aggregator's pragma: it constrains
+# definitions, and the aggregator holds nothing but imports.  Each module
+# carries it in its own pragma (make safety).
+$(AGGREGATOR): ## Regenerate the aggregator from the current tree
+	@{ \
+	  echo "{-# OPTIONS --without-K --safe #-}"; \
+	  echo ""; \
+	  echo "module EverythingGroups where"; \
+	  echo ""; \
+	  find $(SRCDIR) \( -name '*.lagda.md' -o -name '*.agda' \) \
+	      ! -path '$(AGGREGATOR)' \
+	    | sed -e 's|^$(SRCDIR)/||' \
+	          -e 's|\.lagda\.md$$||' \
+	          -e 's|\.agda$$||' \
+	          -e 's|/|.|g' \
+	          -e 's|^|import |' \
+	    | LC_ALL=C sort; \
+	} > $(AGGREGATOR)
+	@echo "wrote $(AGGREGATOR) ($$(grep -c '^import' $(AGGREGATOR)) modules)"
+
+clean: ## Remove this library's interface files and the aggregator
+	rm -rf _build
+	find $(SRCDIR) -name '*.agdai' -delete
+	rm -f $(AGGREGATOR)
+
+# -- Keeping the plan -----------------------------------------------------
 
 populate-dry: guard-engine $(GH_GUARD) ## Preview what populate would create (no mutations)
 	$(POPULATE) $(PLAN) $(FLAGS) --dry-run
