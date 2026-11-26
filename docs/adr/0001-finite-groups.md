@@ -358,9 +358,10 @@ Aschbacher (5.2)" ([`finite-groups.md`] § 9.1).  MathComp's
 Aschbacher's § 6 does, through the maximal p-subgroups.
 
 **Status**.  Decided by William on 2026-11-26, recorded here and not
-reopened.  [#25]'s description names the main reference; the plan's
-"Scope and decisions" still records the deferral of 2026-11-25 and
-mirrors [#25] at its next `make update`, which is William's.
+reopened.  [#25]'s description names the main reference, and the plan's
+listing of M6-1 mirrors it at the next `make update`, which is William's.
+Open: the plan's hand-written "Scope and decisions" still records the
+deferral of 2026-11-25, and needs an edit.
 
 ## 8.  The modules of M2-2 to M2-4
 
@@ -400,7 +401,8 @@ module, and say so in their pull requests.
 (See also [#5] and `spike/README.md` at [`c86d93e`].)
 
 **Decision**.  The spike lives on the issue branch at [`c86d93e`], which
-this record cites, and the pull request's last commit removes it.
+this record cites, and a later commit of the same pull request removes
+it.
 
 +  **What it is**: 18 scratch modules under `spike/`, outside the library
    file's `include: src`, checked by `spike/check.sh` (`agda -i spike -i
@@ -414,8 +416,8 @@ checked from scratch in 1 minute 22 seconds, and the options check of
 M1-1 (`scripts/check-safety.sh`) passed over all 18 (each with
 `--without-K --exact-split --safe` and no postulate).
 
-**Status**.  Chosen by William on 2026-11-26.  The removal is this pull
-request's last commit.
+**Status**.  Chosen by William on 2026-11-26.  The pull request that
+adds this record removes the spike, in the commit after it.
 
 ---
 
@@ -435,7 +437,7 @@ request's last commit.
 | 10 | A quotient is a finite group on G's carrier under N's congruence, with an index map that normalizes no proof (§ 6) | Proposed; for M3-6 ([#14]) | The orders of S₃/A₃ and A₅/1, 2 and 60, by deduplication |
 | 11 | Aschbacher is the main reference; Mines, Richman and Ruitenburg the vocabulary; Gonthier et al. and the MathComp book the design (§ 7) | Decided by William, 2026-11-26 | His comment on [#5]; Aschbacher on 64 lines of MathComp |
 | 12 | The modules of M2-2 to M2-4, nested by topic under `Groups` (§ 8) | Proposed; chosen 2026-11-26 | The spike's modules |
-| 13 | The spike is cited at its commit and removed by the pull request's last commit (§ 9) | Proposed; chosen 2026-11-26 | `spike/check.sh`, 17 modules in 1 minute 22 seconds |
+| 13 | The spike is cited at its commit and removed by the same pull request (§ 9) | Proposed; chosen 2026-11-26 | `spike/check.sh`, 17 modules in 1 minute 22 seconds |
 
 ## References
 
