@@ -140,11 +140,14 @@ follows:
 +  **The universe level**.  A table is a vector of Booleans, so
    `Subgroup G : Type` (that is, `Set₀`) whatever the levels α and ρ of
    G.
-+  **The finite set of subgroups**.  The subgroups of G are the closed
-   tables among the 2ⁿ subsets of `Fin n`, so they form a finite set, and
-   so does every decidable family of them (the Sylow p-subgroups, the
-   normal subgroups, the subgroups between two).  The set exists as a
-   definition; enumerating it is feasible only for small n (§ 5).
++  **The finite set of subgroups**.  The library's subgroups of G are the
+   closed tables among the 2ⁿ subsets of `Fin n`, so they form a finite
+   set, and so does every decidable family of them (the Sylow
+   p-subgroups, the normal subgroups, the subgroups between two).  The set
+   exists as a definition; enumerating it is feasible only for small n
+   (§ 5).  It is the set of agda-algebras' decidable subgroups up to `≐`,
+   through `toDec` and `fromDec`, and not of every predicate subgroup,
+   which need not be decidable (§ 4).
 +  **agda-algebras' subgroups**.  `toDec` makes a table into
    agda-algebras' `DecSubgroup` (a predicate with `IsSubgroup` and a
    decider, at level `0ℓ`), and `fromDec` makes any `DecSubgroup`, at any
@@ -575,10 +578,14 @@ UniMath/agda-unimath, `master` at `c0022bfc` (2026-11-16), under
    over an enumeration.  The `--safe --without-K` Agda developments state
    no equality of subgroups.  Tables are the one design that meets the
    first rule under this library's flags.
-+  **Decidability**.  agda-unimath makes the subgroups of a finite group
-   decidable, and the Symmetry book's Rocq formalization assumes the
-   subgroup decidable in its counting form of Lagrange's theorem, for the
-   reason of the second rule.
++  **Decidability**.  agda-unimath takes a finite subgroup of a finite
+   group to be a decidable subgroup (`Subgroup-Finite-Group`), beside its
+   subgroups of any group, which are subtypes; and the Symmetry book's
+   Rocq formalization assumes the subgroup decidable in its counting form
+   of Lagrange's theorem.  Both keep decidability as a hypothesis or as
+   data, for the reason of the second rule: that every subgroup of a
+   finite group is decidable would decide an arbitrary proposition, by
+   the subgroup of § 4.
 +  **Counting Sylow subgroups**.  MathComp, Mizar, HOL Light, Metamath
    and the Archive count them as a finite set of subgroups, and Mathlib as
    a finite type; each relates the count to the index of a normalizer, as

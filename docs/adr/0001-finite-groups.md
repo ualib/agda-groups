@@ -30,10 +30,12 @@ subgroup is a *table*: a vector of n Booleans over the positions of the
 enumeration (agda-stdlib's `Subset n`) that a Boolean test finds closed
 under the group's operations.  So two subgroups with the same elements
 are equal, propositionally and with no axiom; the subgroups of a finite
-group form a finite set; and the number of Sylow p-subgroups is the size
-of a finite set, as Aschbacher, the library's main reference, defines it.
-agda-algebras' subgroups, which are predicates, pass to tables and back,
-so its group theory applies unchanged.
+group, as tables, form a finite set; and the number of Sylow p-subgroups
+is the size of a finite set, as Aschbacher, the library's main
+reference, defines it.  agda-algebras' decidable subgroups, which are
+predicates with a decision procedure, pass to tables and back, so its
+group theory applies unchanged; a predicate subgroup with no decision
+procedure has no table, and need not be decidable (§ 3).
 
 **Why it is shaped this way**.  Three facts decided it, as follows:
 
@@ -154,9 +156,12 @@ with the passage to and from agda-algebras' decidable subgroups.
    decision procedure for its membership), and `fromDec` makes a
    `DecSubgroup` at any level into its table, with `fromDec (toDec H) ≡
    H` and `toDec (fromDec H) ≐ H` (each predicate inside the other).
-+  **The finite set of subgroups**: the subgroups of G are the closed
-   tables among the 2ⁿ subsets of `Fin n`, a finite set, as is every
-   decidable family of them.
++  **The finite set of subgroups**: the library's subgroups of G are the
+   closed tables among the 2ⁿ subsets of `Fin n`, a finite set, as is
+   every decidable family of them.  Through `toDec` and `fromDec` they
+   correspond to agda-algebras' decidable subgroups up to `≐`, not to
+   every predicate subgroup: that every subgroup of a finite group is
+   decidable would decide an arbitrary proposition (§ 3).
 
 **Evidence**.  `Spike.Finite` at [`c86d93e`] proves the bridge, both
 round trips, `same-elements→≡` (two tables with the same elements are
