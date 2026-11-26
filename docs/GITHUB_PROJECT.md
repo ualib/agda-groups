@@ -457,7 +457,7 @@ Two workflows replace the template's `ci.yml`, as follows (William's decision of
 
 ### Issue M1-3: The conventions file, CITATION.cff and agda-mcp (#4)
 
-**Labels**: `milestone-1-toolchain`, `documentation`
+**Labels**: `documentation`, `milestone-1-toolchain`
 
 ## Description
 
@@ -1128,7 +1128,7 @@ The books are those of the plan's [sources].
 
 ### Issue M6-1: The README's results, the statements module and the changelog (#25)
 
-**Labels**: `milestone-6-release`, `documentation`
+**Labels**: `documentation`, `milestone-6-release`
 
 ## Description
 
@@ -1154,7 +1154,7 @@ The account of the library that the release carries, as follows:
 
 ### Issue M6-2: The documentation site (#26)
 
-**Labels**: `milestone-6-release`, `documentation`
+**Labels**: `documentation`, `milestone-6-release`
 
 ## Description
 
@@ -1202,4 +1202,6 @@ The first release, after agda-lattices' `v0.1.0`, as follows:
 ## Issues outside the milestones
 
 <!-- BEGIN GENERATED: unplanned -->
+
+_(no organically-filed issues; every issue on GitHub carries a `[MN-k]` planning prefix)_
 <!-- END GENERATED: unplanned -->
