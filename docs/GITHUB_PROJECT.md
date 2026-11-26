@@ -390,7 +390,7 @@ graph TD
 
 <!-- BEGIN GENERATED: milestone-1 -->
 
-### Issue M1-1: The dev shell, the library file, the options check and make check
+### Issue M1-1: The dev shell, the library file, the options check and make check (#2)
 
 **Labels**: `milestone-1-toolchain`
 
@@ -425,7 +425,7 @@ The repository holds its plan, its README and the roadmap engine.  This issue ma
 
 ---
 
-### Issue M1-2: CI, with the full check on every pull request and on main, and a lean check
+### Issue M1-2: CI, with the full check on every pull request and on main, and a lean check (#3)
 
 **Labels**: `milestone-1-toolchain`
 
@@ -455,7 +455,7 @@ Two workflows replace the template's `ci.yml`, as follows (William's decision of
 
 ---
 
-### Issue M1-3: The conventions file, CITATION.cff and agda-mcp
+### Issue M1-3: The conventions file, CITATION.cff and agda-mcp (#4)
 
 **Labels**: `milestone-1-toolchain`, `documentation`
 
@@ -487,7 +487,7 @@ What a contributor reads before writing a module, and what a citation of the lib
 
 <!-- BEGIN GENERATED: milestone-2 -->
 
-### Issue M2-1: ADR 0001: the representation of a finite group and of its subgroups
+### Issue M2-1: ADR 0001: the representation of a finite group and of its subgroups (#5)
 
 **Labels**: `milestone-2-finite-groups`, `design`
 
@@ -538,7 +538,7 @@ The ADR decides at least the following: the type of finite groups and its relati
 
 ---
 
-### Issue M2-2: Finite setoids and counting
+### Issue M2-2: Finite setoids and counting (#6)
 
 **Labels**: `milestone-2-finite-groups`, `formalization`
 
@@ -568,7 +568,7 @@ agda-stdlib has the cases on `Fin` (`pigeonhole`, `*↔×`, `+↔⊎`, the sums 
 
 ---
 
-### Issue M2-3: Finite groups, their subgroups and their orders
+### Issue M2-3: Finite groups, their subgroups and their orders (#7)
 
 **Labels**: `milestone-2-finite-groups`, `formalization`
 
@@ -597,7 +597,7 @@ On the representation of ADR 0001 and the counting of M2-2, the following:
 
 ---
 
-### Issue M2-4: Table groups, the symmetric groups and Cayley's theorem
+### Issue M2-4: Table groups, the symmetric groups and Cayley's theorem (#8)
 
 **Labels**: `milestone-2-finite-groups`, `formalization`
 
@@ -633,7 +633,7 @@ The books are those of the plan's [sources].
 
 <!-- BEGIN GENERATED: milestone-3 -->
 
-### Issue M3-1: Cosets, the index and Lagrange's theorem
+### Issue M3-1: Cosets, the index and Lagrange's theorem (#9)
 
 **Labels**: `milestone-3-cosets-actions`, `formalization`
 
@@ -665,7 +665,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M3-2: Group actions, orbits and stabilizers
+### Issue M3-2: Group actions, orbits and stabilizers (#10)
 
 **Labels**: `milestone-3-cosets-actions`, `formalization`
 
@@ -698,7 +698,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M3-3: Products of subgroups and internal direct products
+### Issue M3-3: Products of subgroups and internal direct products (#11)
 
 **Labels**: `milestone-3-cosets-actions`, `formalization`
 
@@ -730,7 +730,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M3-4: Conjugation, normalizers, centralizers and generated subgroups
+### Issue M3-4: Conjugation, normalizers, centralizers and generated subgroups (#12)
 
 **Labels**: `milestone-3-cosets-actions`, `formalization`
 
@@ -764,7 +764,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M3-5: Conjugacy classes and the class equation
+### Issue M3-5: Conjugacy classes and the class equation (#13)
 
 **Labels**: `milestone-3-cosets-actions`, `formalization`
 
@@ -793,7 +793,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M3-6: Quotient groups and the correspondence theorem
+### Issue M3-6: Quotient groups and the correspondence theorem (#14)
 
 **Labels**: `milestone-3-cosets-actions`, `formalization`
 
@@ -828,7 +828,7 @@ The books are those of the plan's [sources].
 
 <!-- BEGIN GENERATED: milestone-4 -->
 
-### Issue M4-1: p-groups acting on finite setoids, and the center of a p-group
+### Issue M4-1: p-groups acting on finite setoids, and the center of a p-group (#15)
 
 **Labels**: `milestone-4-sylow`, `formalization`
 
@@ -858,7 +858,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M4-2: Cauchy's theorem
+### Issue M4-2: Cauchy's theorem (#16)
 
 **Labels**: `milestone-4-sylow`, `formalization`
 
@@ -885,7 +885,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M4-3: Sylow's first theorem
+### Issue M4-3: Sylow's first theorem (#17)
 
 **Labels**: `milestone-4-sylow`, `formalization`
 
@@ -915,7 +915,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M4-4: Sylow's second theorem
+### Issue M4-4: Sylow's second theorem (#18)
 
 **Labels**: `milestone-4-sylow`, `formalization`
 
@@ -944,7 +944,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M4-5: Sylow's third theorem
+### Issue M4-5: Sylow's third theorem (#19)
 
 **Labels**: `milestone-4-sylow`, `formalization`
 
@@ -973,7 +973,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M4-6: Worked examples: the Sylow subgroups of small groups
+### Issue M4-6: Worked examples: the Sylow subgroups of small groups (#20)
 
 **Labels**: `milestone-4-sylow`, `formalization`
 
@@ -1004,7 +1004,7 @@ Record the time each example takes to check.  Where an evaluation costs too much
 
 <!-- BEGIN GENERATED: milestone-5 -->
 
-### Issue M5-1: Fixed-point-free automorphisms (Gorenstein, Theorem 10.1.2)
+### Issue M5-1: Fixed-point-free automorphisms (Gorenstein, Theorem 10.1.2) (#21)
 
 **Labels**: `milestone-5-further`, `formalization`
 
@@ -1034,7 +1034,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M5-2: Characteristic subgroups and abelian minimal normal subgroups
+### Issue M5-2: Characteristic subgroups and abelian minimal normal subgroups (#22)
 
 **Labels**: `milestone-5-further`, `formalization`
 
@@ -1063,7 +1063,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M5-3: The commutator subgroup and perfect groups
+### Issue M5-3: The commutator subgroup and perfect groups (#23)
 
 **Labels**: `milestone-5-further`, `formalization`
 
@@ -1092,7 +1092,7 @@ The books are those of the plan's [sources].
 
 ---
 
-### Issue M5-4: Complements of an abelian normal subgroup and 1-cocycles
+### Issue M5-4: Complements of an abelian normal subgroup and 1-cocycles (#24)
 
 **Labels**: `milestone-5-further`, `formalization`
 
@@ -1126,7 +1126,7 @@ The books are those of the plan's [sources].
 
 <!-- BEGIN GENERATED: milestone-6 -->
 
-### Issue M6-1: The README's results, the statements module and the changelog
+### Issue M6-1: The README's results, the statements module and the changelog (#25)
 
 **Labels**: `milestone-6-release`, `documentation`
 
@@ -1152,7 +1152,7 @@ The account of the library that the release carries, as follows:
 
 ---
 
-### Issue M6-2: The documentation site
+### Issue M6-2: The documentation site (#26)
 
 **Labels**: `milestone-6-release`, `documentation`
 
@@ -1173,7 +1173,7 @@ A site like agda-lattices' (William's decision of 2026-11-25): MkDocs Material, 
 
 ---
 
-### Issue M6-3: The first release, v0.1.0, with a Zenodo DOI
+### Issue M6-3: The first release, v0.1.0, with a Zenodo DOI (#27)
 
 **Labels**: `milestone-6-release`
 
