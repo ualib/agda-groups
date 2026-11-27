@@ -50,9 +50,19 @@ follows:
    given by generators), `Groups.Subgroup.Group` (a subgroup as a finite
    group) and `Groups.Subgroup.Notions` (normal subgroups, abelian and
    elementary abelian groups, the subgroups between two, complements and
-   minimal normal subgroups), with V₄, S₃ and A₅ as finite groups in
-   `Groups.Examples.Small` and the evaluations in
-   `Groups.Subgroup.Examples`.
+   minimal normal subgroups), with the evaluations in
+   `Groups.Subgroup.Examples`;
++  the concrete groups and Cayley's theorem: `Groups.Homomorphism`
+   (homomorphisms and isomorphisms from maps that preserve the product),
+   `Groups.Table` (groups on `Fin n`, re-tabulation, and the Agda
+   Universal Algebra Library's table groups), `Groups.Cyclic` (ℤ/n),
+   `Groups.Symmetric` (Sym(n), of order n!, with permutations stored as
+   vectors of images and enumerated by a factorial numbering) and
+   `Groups.Cayley` (Cayley's theorem, by the left regular
+   representation), with that library's example groups (V₄, ℤ/2, ℤ/3,
+   ℤ/6, S₃ and A₅) as finite groups in `Groups.Examples.Small` and the
+   evaluations in `Groups.Table.Examples`, `Groups.Symmetric.Examples`
+   and `Groups.Cayley.Examples`.
 
 The plan, [`docs/GITHUB_PROJECT.md`](docs/GITHUB_PROJECT.md), has six
 milestones, as follows:
