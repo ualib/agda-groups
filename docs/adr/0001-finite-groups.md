@@ -38,9 +38,9 @@ its membership.  Two subgroups are equal when they have the same
 elements (`≐`, a pair of inclusions), which the enumeration decides.  A
 subgroup is given as GAP gives it, by generators: x lies in ⟨A⟩ when a
 word in A and its inverses evaluates to x, and the decision procedure
-reads a table of such words that a search computes and Agda checks.
-Inclusion, normalizers and conjugates are then decided by testing the
-generators alone.
+reads a vector of such words, one for each element reached, that a
+search computes and Agda checks.  Inclusion, normalizers and conjugates
+are then decided by testing the generators alone.
 
 **Why it is shaped this way**.  Four facts decided it, as follows:
 
