@@ -4,11 +4,13 @@
 
 File: `agda-groups/docs/adr/0001-finite-groups.md`
 
-+  **Status**: Proposed.  William chose the option of every decision area
-   on 2026-11-26, and reopened the representation of subgroups the same
-   day; §§ 2 to 4 record the option the second spike measured, which he
-   asked for.  Accepting the record is his, and M2-2 to M2-4 implement it.
-+  **Date**: 2026-11-26 (§§ 2 to 4, 6, 8 and 9 revised the same day).
++  **Status**: Accepted (William, 2026-11-26).  He chose the option of
+   every decision area on 2026-11-26, reopened the representation of
+   subgroups the same day, and accepted the record as revised, before the
+   merge; §§ 2 to 4 record the option the second spike measured, which he
+   asked for.  M2-2 to M2-4 implement it.
++  **Date**: 2026-11-26 (§§ 2 to 4, 6, 8 and 9 revised, and the record
+   accepted, the same day).
 +  **Tracking**: [#5] (M2-1, this record); [#6], [#7] and [#8] (M2-2 to
    M2-4, which implement it); [#10] (M3-2, the action on the conjugates of
    a subgroup, § 4); [#12] (M3-4, normalizers and generated subgroups,
@@ -65,14 +67,14 @@ are then decided by testing the generators alone.
    given directly, so the enumeration is data a finite group carries
    (§ 1).
 
-**Where it stands**.  Proposed.  The spike built every notion in Agda
+**Where it stands**.  Accepted.  The spike built every notion in Agda
 under the library's flags with no postulate: the first spike
 ([`c86d93e`]) the finite groups and the tables, the second ([`1996be2`])
 the decidable subgroups given by generators, beside the tables on the
 same examples.  On A₅ the distinct conjugates of its Sylow subgroups take
 167 to 206 ms by generators against 635 to 649 ms by tables, and A₄'s
 Sylow counts inside A₅ 36 ms against 1,044 ms.  William chose the option
-of each area on 2026-11-26.
+of each area on 2026-11-26, and accepted the record the same day.
 
 **Where it goes**.  M2-2 to M2-4 implement the types in the modules of
 § 8; M3-6 gives quotients an enumeration with a cheap index map (§ 6);
@@ -448,8 +450,9 @@ which are the indices their deciders accept.
 
 **Status**.  The subgroup's enumeration was part of the option of § 1
 that William chose on 2026-11-26, and M2-3 ([#7]) implements it in
-`Groups.Subgroup.Group`.  The quotient's is proposed here.  Open: the
-quotient group and its enumeration, M3-6 ([#14]).
+`Groups.Subgroup.Group`.  The quotient's is decided here, for M3-6 to
+implement.  Open: the quotient group and its enumeration, M3-6
+([#14]).
 
 ## 7.  The references
 
@@ -566,20 +569,20 @@ adds this record removes the spike, in the commit after its revision.
 
 | # | Decision | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | A finite group is agda-algebras' `Group` with agda-algebras' `IrredundantEnumeration` of its carrier, as data; its order is `icard` (§ 1) | Proposed; chosen 2026-11-26; M2-3 ([#7]) | 141 ms per index lookup through deduplication on A₅, 23 ms for sixty through a given enumeration; the deduplicated module stopped at 20 minutes |
-| 2 | Groups on `Fin n` are a constructor and a view, by re-tabulation, not the type (§ 1) | Proposed; chosen 2026-11-26; M2-4 ([#8]) | Re-tabulated A₄ 2,203 ms against 1,057 ms |
-| 3 | A subgroup is agda-algebras' `DecSubgroup`, and equality of subgroups is `≐`, decided over the enumeration (§ 2) | Proposed; revised 2026-11-26 from tables; M2-3 ([#7]) | The second spike; William's preference for setoids |
-| 4 | A subgroup is given by generators: membership is a word, decided by a Schreier vector whose certificate a concrete group checks by evaluation; inclusion, normalizers and conjugates are decided by the generators (§ 2) | Proposed; 2026-11-26; M2-3 ([#7]), M3-4 ([#12]) | A₅'s conjugates 167 to 206 ms against 635 to 649 ms by tables; certificates 12 ms or less against closure checks of 142 to 170 ms |
-| 5 | Certificates are held in records (`Generators`, `Adjoined`), never in a type at a call (§ 2) | Proposed; 2026-11-26; M2-3 ([#7]) | The heap exhausted in 49 s, against 3,982 ms in a record |
-| 6 | A decider asked many questions is remembered as a table (`memo`); tables are otherwise a search for the smallest groups (§ 2) | Proposed; 2026-11-26; M2-3 ([#7]) | Deciders composed: 2,314 ms; the normalizer's index 388 ms afresh, 115 ms remembered |
-| 7 | Equality of subgroups is `≐`; a statement may end in a disjunction about every decidable subgroup between two, from the generator condition; the witnessed form serves predicates (§ 3) | Proposed; revised 2026-11-26; M2-3 ([#7]) | `disjunctive→LEM` for predicates on S₃; `between` and `generates`, decided on S₃ and on A₅ |
-| 8 | nₚ in two forms, the textbook's first: the size of the finite setoid Syl_p(G), and the number of conjugates of one P; Sylow's third theorem equates them (§ 4) | Proposed; revised 2026-11-26; M4-5 ([#19]) | A₅'s computed forms in 167 to 206 ms; its textbook forms for p = 5 and 3 in 308 and 204 ms |
-| 9 | Both forms of a definition, the textbook's first, with the theorem that they agree (§ 5) | Proposed; William's rule of 2026-11-26 | § 4 |
-| 10 | A subgroup is a finite group enumerated by the indices its decider accepts (§ 6) | Proposed; chosen 2026-11-26; M2-3 ([#7]) | A₄'s Sylow counts in 1,057 ms as a group, 36 ms inside A₅ |
-| 11 | A quotient is a finite group on G's carrier under N's congruence, with an index map that normalizes no proof (§ 6) | Proposed; for M3-6 ([#14]) | The orders of S₃/A₃ and A₅/1, 2 and 60, by deduplication |
+| 1 | A finite group is agda-algebras' `Group` with agda-algebras' `IrredundantEnumeration` of its carrier, as data; its order is `icard` (§ 1) | Accepted; chosen 2026-11-26; M2-3 ([#7]) | 141 ms per index lookup through deduplication on A₅, 23 ms for sixty through a given enumeration; the deduplicated module stopped at 20 minutes |
+| 2 | Groups on `Fin n` are a constructor and a view, by re-tabulation, not the type (§ 1) | Accepted; chosen 2026-11-26; M2-4 ([#8]) | Re-tabulated A₄ 2,203 ms against 1,057 ms |
+| 3 | A subgroup is agda-algebras' `DecSubgroup`, and equality of subgroups is `≐`, decided over the enumeration (§ 2) | Accepted; revised 2026-11-26 from tables; M2-3 ([#7]) | The second spike; William's preference for setoids |
+| 4 | A subgroup is given by generators: membership is a word, decided by a Schreier vector whose certificate a concrete group checks by evaluation; inclusion, normalizers and conjugates are decided by the generators (§ 2) | Accepted; 2026-11-26; M2-3 ([#7]), M3-4 ([#12]) | A₅'s conjugates 167 to 206 ms against 635 to 649 ms by tables; certificates 12 ms or less against closure checks of 142 to 170 ms |
+| 5 | Certificates are held in records (`Generators`, `Adjoined`), never in a type at a call (§ 2) | Accepted; 2026-11-26; M2-3 ([#7]) | The heap exhausted in 49 s, against 3,982 ms in a record |
+| 6 | A decider asked many questions is remembered as a table (`memo`); tables are otherwise a search for the smallest groups (§ 2) | Accepted; 2026-11-26; M2-3 ([#7]) | Deciders composed: 2,314 ms; the normalizer's index 388 ms afresh, 115 ms remembered |
+| 7 | Equality of subgroups is `≐`; a statement may end in a disjunction about every decidable subgroup between two, from the generator condition; the witnessed form serves predicates (§ 3) | Accepted; revised 2026-11-26; M2-3 ([#7]) | `disjunctive→LEM` for predicates on S₃; `between` and `generates`, decided on S₃ and on A₅ |
+| 8 | nₚ in two forms, the textbook's first: the size of the finite setoid Syl_p(G), and the number of conjugates of one P; Sylow's third theorem equates them (§ 4) | Accepted; revised 2026-11-26; M4-5 ([#19]) | A₅'s computed forms in 167 to 206 ms; its textbook forms for p = 5 and 3 in 308 and 204 ms |
+| 9 | Both forms of a definition, the textbook's first, with the theorem that they agree (§ 5) | Accepted; William's rule of 2026-11-26 | § 4 |
+| 10 | A subgroup is a finite group enumerated by the indices its decider accepts (§ 6) | Accepted; chosen 2026-11-26; M2-3 ([#7]) | A₄'s Sylow counts in 1,057 ms as a group, 36 ms inside A₅ |
+| 11 | A quotient is a finite group on G's carrier under N's congruence, with an index map that normalizes no proof (§ 6) | Accepted; for M3-6 ([#14]) | The orders of S₃/A₃ and A₅/1, 2 and 60, by deduplication |
 | 12 | Aschbacher is the main reference; Mines, Richman and Ruitenburg the vocabulary; GAP, Gonthier et al. and the MathComp book the design (§ 7) | Decided by William, 2026-11-26 | His comment on [#5]; Aschbacher on 64 lines of MathComp |
-| 13 | The modules of M2-2 to M2-4, nested by topic under `Groups` (§ 8) | Proposed; chosen and revised 2026-11-26 | The spike's modules |
-| 14 | The spike is cited at its two commits and removed by the same pull request (§ 9) | Proposed; chosen 2026-11-26 | `spike/check.sh`: 17 modules in 1 minute 22 seconds, then 24 in 1 minute 50 seconds |
+| 13 | The modules of M2-2 to M2-4, nested by topic under `Groups` (§ 8) | Accepted; chosen and revised 2026-11-26 | The spike's modules |
+| 14 | The spike is cited at its two commits and removed by the same pull request (§ 9) | Accepted; chosen 2026-11-26 | `spike/check.sh`: 17 modules in 1 minute 22 seconds, then 24 in 1 minute 50 seconds |
 
 ## References
 
