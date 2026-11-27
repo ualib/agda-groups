@@ -170,11 +170,12 @@ private
   pos-rank (false ∷ t) zero     ()
   pos-rank (false ∷ t) (suc i)  m  = cong suc (pos-rank t i m)
 
-  -- The truth of a decision is its proposition.
+  -- A decision that answers yes proves its proposition ...
   does⇒ : ∀ {A : Type p} (d : Dec A) → T (does d) → A
   does⇒ (yes a) _  = a
   does⇒ (no _)  ()
 
+  -- ... and a proof of the proposition makes it answer yes.
   ⇒does : ∀ {A : Type p} (d : Dec A) → A → T (does d)
   ⇒does (yes _) _  = tt
   ⇒does (no ¬a) a  = ¬a a
@@ -232,10 +233,11 @@ The table holds the position i exactly when P holds the i-th element.
   ∈⇒T-table : (P : DecSubset S p) {i : Fin size} → enum i ∈ set P → T (lookup (table P) i)
   ∈⇒T-table P {i} pi = subst T (sym (lookup-table P i)) (⇒does (decide P (enum i)) pi)
 
-  -- The same, for agda-stdlib's membership in a Subset.
+  -- The same, for agda-stdlib's membership in a Subset: an index in the table is a member's ...
   ∈table⇒∈ : (P : DecSubset S p) {i : Fin size} → i Sub.∈ table P → enum i ∈ set P
   ∈table⇒∈ P {i} m = T-table⇒∈ P (subst T (sym ([]=⇒lookup m)) tt)
 
+  -- ... and a member's index is in the table.
   ∈⇒∈table : (P : DecSubset S p) {i : Fin size} → enum i ∈ set P → i Sub.∈ table P
   ∈⇒∈table P {i} pi = lookup⇒[]= i (table P) (T-true (∈⇒T-table P pi))
     where
@@ -278,10 +280,11 @@ subset of a subset is no larger, and smaller when the second holds an
 element outside the first; and the complement has the remaining size.
 
 ```agda
-  -- Equal subsets have equal tables, so equal sizes.
+  -- Equal subsets have equal tables ...
   table-cong : (P : DecSubset S p) (Q : DecSubset S q) → set P ≐ set Q → table P ≡ table Q
   table-cong P Q (P⊆Q , Q⊆P) = tabulate-cong (λ i → does-cong P⊆Q Q⊆P (decide P (enum i)) (decide Q (enum i)))
 
+  -- ... so equal sizes.
   P≐Q⇒∣P∣≡∣Q∣ : (P : DecSubset S p) (Q : DecSubset S q) → set P ≐ set Q → ∣ P ∣ ≡ ∣ Q ∣
   P≐Q⇒∣P∣≡∣Q∣ P Q eq = cong Sub.∣_∣ (table-cong P Q eq)
 
@@ -289,10 +292,11 @@ element outside the first; and the complement has the remaining size.
   ∣P∣≤n : (P : DecSubset S p) → ∣ P ∣ ≤ size
   ∣P∣≤n P = SubP.∣p∣≤n (table P)
 
-  -- The whole setoid has its size, and the empty subset size 0.
+  -- The whole setoid has its size ...
   ∣full∣≡n : ∣ full ∣ ≡ size
   ∣full∣≡n = ∣tabulate-true∣ size
 
+  -- ... and the empty subset size 0.
   ∣empty∣≡0 : ∣ empty ∣ ≡ 0
   ∣empty∣≡0 = ∣tabulate-false∣ size
 
@@ -325,6 +329,7 @@ element outside the first; and the complement has the remaining size.
   ∣∁P∣≡n∸∣P∣ : (P : DecSubset S p) → ∣ ∁ P ∣ ≡ size ∸ ∣ P ∣
   ∣∁P∣≡n∸∣P∣ P = trans (cong Sub.∣_∣ (table-∁ P)) (SubP.∣∁p∣≡n∸∣p∣ (table P))
 
+  -- A subset and its complement together have the size of the setoid.
   ∣P∣+∣∁P∣≡n : (P : DecSubset S p) → ∣ P ∣ + ∣ ∁ P ∣ ≡ size
   ∣P∣+∣∁P∣≡n P = trans (cong (∣ P ∣ +_) (∣∁P∣≡n∸∣P∣ P)) (m+[n∸m]≡n (∣P∣≤n P))
 ```

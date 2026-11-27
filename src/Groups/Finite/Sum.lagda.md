@@ -339,6 +339,7 @@ classes enumerated by them.
     }
 
   private
+    -- The first members, as a finite setoid.
     firsts : FiniteSetoid (subsetoid first)
     firsts = Counting.finite (Finᶠ n) first
 
