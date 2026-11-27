@@ -50,7 +50,7 @@ open import Relation.Binary.Definitions            using ( Decidable ; _Respects
 open import Relation.Binary.PropositionalEquality  using ( _≡_ ; refl ; sym ; trans ; cong )
 open import Relation.Nullary.Decidable             using ( Dec ; does ; _→?_ ; ¬? ; toWitness ; toWitnessFalse )
 open import Relation.Nullary.Negation              using ( ¬_ )
-open import Relation.Unary                         using ( _∈_ ; _⊆_ ; _≐_ )
+open import Relation.Unary                         using ( _∈_ ; _⊆_ ; _⊈_ ; _≐_ )
 
 import Data.Bool.Properties                        as Bool
 import Data.Fin.Properties                         as Fin
@@ -71,9 +71,19 @@ open import Setoid.Algebras.Finite.Irredundant     using ( IrredundantEnumeratio
 import Overture
 
 -- Imports from this library
-open import Groups.Finite.Setoid
-open import Groups.Finite.Subset
-open import Groups.Finite.Sum
+open import Groups.Finite.Setoid                   using ( FiniteSetoid ; fromInverse ; Finᶠ ; transport
+                                                         ; fromIrredundant ; toIrredundant ; toFiniteAlgebra
+                                                         ; injective⇒≤ ; bijection⇒≡ ; inverse⇒≡ ; size-unique
+                                                         ; pigeonhole ; pigeonholeˢ ; injective⇒onto-Fin
+                                                         ; injective⇒onto )
+open import Groups.Finite.Subset                   using ( DecSubset ; set ; respects ; decide ; ∁ ; full
+                                                         ; empty ; subsetoid ; module Counting )
+open import Groups.Finite.Sum                      using ( _⊎ᶠ_ ; _×ᶠ_ ; ∷-inverse ; _^ᶠ_ ; size-^ᶠ ; 𝟙
+                                                         ; ∣tabulate∣≡∑ ; ∑-const ; ∑-δ ; ∣P∣≡∑ ; ∑-unique
+                                                         ; module Partition ; enumerable⇒finite ; sumOn
+                                                         ; ∣-sum ; sumOn-1 ; sumOn-cong ; sum≡sumOn+sumOn∁
+                                                         ; p∣sumOn∁ ; sum≡sumOn+q*p ; sum%p≡sumOn%p
+                                                         ; p∣sum⇔p∣sumOn )
 
 open FiniteSetoid using ( size ; enum ; idx )
 ```
@@ -250,7 +260,11 @@ inclusions and the witness of the failed one; the size lemmas; the
 multiples of 3 as a finite setoid; and a table read back as a subset.
 
 ```agda
-open Counting F₆
+open Counting F₆ using ( table ; ∣_∣ ; lookup-table ; T-table⇒∈ ; ∈⇒T-table ; ∈table⇒∈ ; ∈⇒∈table
+                       ; _⊆?_ ; _≐?_ ; ⊈⇒∃ ; table-cong ; P≐Q⇒∣P∣≡∣Q∣ ; ∣P∣≤n ; ∣full∣≡n ; ∣empty∣≡0
+                       ; table-mono ; P⊆Q⇒∣P∣≤∣Q∣ ; P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ ; P⊂Q⇒∣P∣<∣Q∣ ; table-∁
+                       ; ∣∁P∣≡n∸∣P∣ ; ∣P∣+∣∁P∣≡n ; P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P ; P⊆Q∧∣P∣≡∣Q∣⇒P≐Q ; ∣P∣≡n⇒∈P
+                       ; ∈⇒0<∣P∣ ; 0<∣P∣⇒∃ ; fromTable ; table-fromTable ; fromTable-table ; finite )
 
 -- The multiples of 3.
 M₃ : DecSubset (≡.setoid (Fin 6)) 0ℓ
@@ -274,6 +288,8 @@ sizes = refl , refl , refl , refl , refl
 ⊆?-M₃-B₄ : does (M₃ ⊆? B₄) ≡ true × does (B₄ ⊆? M₃) ≡ false × does (M₃ ≐? M₃) ≡ true
 ⊆?-M₃-B₄ = refl , refl , refl
 
+-- The failed inclusion, read from its decision.
+B₄⊈M₃ : set B₄ ⊈ set M₃
 B₄⊈M₃ = toWitnessFalse {a? = B₄ ⊆? M₃} tt
 
 ⊈⇒∃-B₄-M₃ : proj₁ (⊈⇒∃ B₄ M₃ B₄⊈M₃) ≡ 1F
