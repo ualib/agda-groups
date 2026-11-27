@@ -12,3 +12,5 @@ The records are as follows:
 +  [ADR 0001: finite groups](0001-finite-groups.md), Accepted: the
    representation of a finite group and of its subgroups (M2-1, issue 5),
    with its companion note [`finite-groups.md`](../notes/finite-groups.md).
+
+A line that changes only prose, for the skip of the full check.
