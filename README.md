@@ -151,6 +151,14 @@ input of this repository's flake, so `nix develop` puts it on `PATH`, and
 After the first populate, an issue's text is edited on GitHub, and
 `make update` mirrors it into the plan.
 
+## Contributing and citing
+
+[`CONTRIBUTING.md`](CONTRIBUTING.md) says how a contribution is checked,
+how a module is written and cited, and how its types are stated over the
+library's finite groups and subgroups.  To cite the library, use the
+metadata in [`CITATION.cff`](CITATION.cff); a DOI comes with the first
+release.
+
 ## License
 
 The library is licensed under the Apache License 2.0 (`LICENSE`).
