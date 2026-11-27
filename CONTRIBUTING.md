@@ -63,8 +63,8 @@ and then the lint's count of the plan's milestones, labels and issues,
 with 0 errors and 0 warnings:
 
     bash scripts/check-safety.sh src agda-groups.agda-lib
-    safety: 5 modules, each with the pragma and no postulate or unsafe pragma
-    wrote src/EverythingGroups.agda (5 modules)
+    safety: 12 modules, each with the pragma and no postulate or unsafe pragma
+    wrote src/EverythingGroups.agda (12 modules)
     agda +RTS -M6G -A128M -RTS  src/EverythingGroups.agda
     gh-project-lint docs/GITHUB_PROJECT.md
 
