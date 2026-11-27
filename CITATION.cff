@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+type: software
+title: "agda-groups: finite group theory in Agda"
+abstract: >-
+  A library of finite group theory in Agda, on the group theory of the Agda
+  Universal Algebra Library, whose modules it imports rather than copies.
+  A finite group is a group of that library with an irredundant enumeration
+  of its carrier, and a subgroup is a decidable subgroup, given by
+  generators where it can be, with equality of subgroups as a pair of
+  inclusions; this is how a finite group and its subgroups are counted.  On
+  that representation the library is to develop cosets and the index,
+  Lagrange's theorem, group actions and the orbit-stabilizer theorem, the
+  product formula, normalizers, centralizers and the center, conjugacy
+  classes and the class equation, quotient groups and the correspondence
+  theorem, Cayley's theorem, p-groups and their centers, Cauchy's theorem,
+  Sylow's three theorems in full, fixed-point-free automorphisms, abelian
+  minimal normal subgroups, perfect groups, and the complements of an
+  abelian normal subgroup and their 1-cocycles.  Each result is stated as a
+  textbook of finite group theory states it and cites its number there,
+  Aschbacher's Finite Group Theory first.  Every module is checked under
+  --without-K --exact-split --safe, with no postulate.
+authors:
+  - family-names: "DeMeo"
+    given-names: "William"
+    orcid: "https://orcid.org/0000-0003-1832-5690"
+license: Apache-2.0
+repository-code: "https://github.com/ualib/agda-groups"
+keywords:
+  - Agda
+  - group theory
+  - finite groups
+  - Sylow theorems
+  - universal algebra
+  - constructive mathematics
+  - formal verification
