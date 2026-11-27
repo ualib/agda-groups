@@ -1,0 +1,156 @@
+# =============================================================================
+#  check.yml: the full check of agda-groups
+#  ----------------------------------------------------------------------------
+#
+#  One job, `nix develop --command make check`, the command a reader runs
+#  locally: the options check, Agda on every module, then the plan's lint.
+#  It runs on every push to a pull request and to main.  The lean check,
+#  with no Agda, is lean.yml.
+#
+#  Design notes, as follows:
+#
+#    + The Agda is the environment agda-algebras' flake exports (Agda 2.9.0
+#      with the standard library 2.4.1), which takes about an hour to build
+#      from source.  The public Cachix cache `formalverification`, which
+#      agda-algebras' own CI fills, holds it.  This job reads that cache as
+#      a plain Nix substituter (`extra_nix_config` below) and installs no
+#      Cachix tool and no token, so nothing can be pushed to any cache.
+#      A step before the shell fails in seconds if the cache lacks the
+#      pinned Agda, rather than building it into the job's time limit.
+#    + `nix develop -i --keep HOME`: the runner's own git, gh and bash are
+#      off the PATH, so the job proves the shell holds every tool it uses.
+#    + The actions/cache entry holds _build/ (this library's interfaces)
+#      and .deps/ (the shell's copy of the pinned agda-algebras, with its
+#      interfaces and the .source stamp the shell compares against the
+#      pin).  The key has two parts, as follows:
+#        - the toolchain: a hash of two store paths, the Agda environment
+#          the shell runs (Agda and the standard library, with every input
+#          they are built from, transitive ones included) and the
+#          agda-algebras sources the shell copies to .deps/.  Store paths,
+#          not lock nodes: a change anywhere in their closure (an update
+#          of agda-algebras/nixpkgs or agda-algebras/agda alone, which
+#          leaves the agda-algebras node of flake.lock as it was, or an
+#          edit of flake.nix) moves them, and a change outside it (the
+#          plan engine's pin) does not, so it keeps the entry.
+#        - the sources (the library file and src/).  The restore key drops
+#          this part, so a run after a change to src/ restores the last
+#          entry for the pin and Agda checks only what changed (Agda
+#          compares each interface with its source, so a stale entry is
+#          safe).  An entry is saved only when the job succeeds.
+#    + The skip.  On a pull request whose files are all Markdown, other
+#      than literate Agda (.lagda.md) and the plan (docs/GITHUB_PROJECT.md,
+#      which make check lints), every step after the decision is skipped
+#      and the job passes.  The skip is a condition inside the job, not a
+#      `paths` filter on the workflow, since a filtered workflow never
+#      reports and leaves a required check waiting; and not a condition on
+#      the job after a separate job that decides, since a job skipped
+#      because the job it needs failed also reports as passing.  Pushes to
+#      main and manual runs never skip: main's runs are the record of each
+#      merge and fill the cache entries that pull requests restore.
+#    + A newer push to a pull request cancels the run it supersedes; a run
+#      on main is never cancelled.
+#
+# =============================================================================
+
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Type-check the library
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # The merge commit of a pull request and its first parent, the
+          # base, for the skip's diff.
+          fetch-depth: 2
+
+      - name: The runner
+        run: |
+          nproc
+          free -m
+          df -h / || true
+          grep -E '^(NAME|VERSION)=' /etc/os-release
+
+      - name: Decide whether the change needs Agda
+        id: scope
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != pull_request ]; then
+            echo "agda=true" >> "$GITHUB_OUTPUT"
+            echo "A $EVENT run always runs the full check."
+            exit 0
+          fi
+          files=$(git diff --no-renames --name-only HEAD^1 HEAD)
+          printf 'Changed files:\n%s\n' "$files"
+          other=$(printf '%s\n' "$files" | grep -v -E '\.md$' || true)
+          read=$(printf '%s\n' "$files" \
+                   | grep -E '\.lagda\.md$|^docs/GITHUB_PROJECT\.md$' || true)
+          if [ -z "$files" ] || [ -n "$other" ] || [ -n "$read" ]; then
+            echo "agda=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "agda=false" >> "$GITHUB_OUTPUT"
+            echo "Only Markdown that no check reads: the full check is skipped."
+          fi
+
+      - name: Install Nix, reading the formalverification cache
+        if: steps.scope.outputs.agda == 'true'
+        uses: cachix/install-nix-action@v32
+        with:
+          extra_nix_config: |
+            extra-substituters = https://formalverification.cachix.org
+            extra-trusted-public-keys = formalverification.cachix.org-1:KG/AJuuli2F4/bA56rUYC9V8ZE/Zw6iZjxJEf40cQOo=
+
+      - name: The pinned Agda is in the cache, and the toolchain's key
+        id: toolchain
+        if: steps.scope.outputs.agda == 'true'
+        run: |
+          set -euo pipefail
+          flake="(builtins.getFlake \"git+file://$PWD?shallow=1\")"
+          agda=$(nix eval --raw --impure --expr \
+            "$flake.inputs.agda-algebras.packages.x86_64-linux.default.outPath")
+          algebras=$(nix eval --raw --impure --expr "$flake.inputs.agda-algebras.outPath")
+          echo "Agda environment: $agda"
+          echo "agda-algebras:    $algebras"
+          if nix path-info --store https://formalverification.cachix.org "$agda"; then
+            echo "The pinned Agda is in the cache."
+          else
+            echo "::error::$agda is not in the formalverification cache"
+            exit 1
+          fi
+          echo "hash=$(printf '%s %s' "$agda" "$algebras" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the interface files and the agda-algebras copy
+        if: steps.scope.outputs.agda == 'true'
+        uses: actions/cache@v6
+        with:
+          path: |
+            _build/
+            .deps/
+          key: agdai-${{ runner.os }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('agda-groups.agda-lib', 'src/**/*.lagda.md', 'src/**/*.agda') }}
+          restore-keys: |
+            agdai-${{ runner.os }}-${{ steps.toolchain.outputs.hash }}-
+
+      - name: Check the options, type-check the library and lint the plan
+        if: steps.scope.outputs.agda == 'true'
+        run: |
+          set -euxo pipefail
+          nix develop -i --keep HOME --command make check

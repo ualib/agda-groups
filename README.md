@@ -90,6 +90,21 @@ Library, the next `make check` also checks that module and the modules it
 imports, and keeps their interface files under `.deps/`, so later runs
 check this library alone.
 
+### On GitHub
+
+Two workflows run on every push to a pull request and to `main`, as
+follows:
+
++  `check.yml` runs `nix develop --command make check`, reading the Agda
+   from the cache `formalverification` and pushing to no cache, and keeps
+   `_build/` and `.deps/` between runs, so that a run checks only what
+   changed.  A pull request whose files are all Markdown, other than
+   literate Agda and the plan, passes it without running Agda.
++  `lean.yml` runs `nix develop .#lean --command make check-lean`, with no
+   Agda, and reports in about a minute.
+
+Each workflow's header says how it is built and why.
+
 ### What the options check holds
 
 Under `--safe` Agda refuses postulates, unsafe options and the pragmas

@@ -1,0 +1,50 @@
+# =============================================================================
+#  lean.yml: the lean check of agda-groups
+#  ----------------------------------------------------------------------------
+#
+#  One job, `nix develop .#lean --command make check-lean`: the options
+#  check, its cases and the plan's lint, in the shell without Agda, so that
+#  a missing pragma or a broken plan is reported in about a minute.  It runs
+#  on every push to a pull request and to main, with no skip.  The full
+#  check, with Agda, is check.yml.
+#
+#  The lean shell fetches nothing from the formalverification cache, so this
+#  job reads only Nix's own cache and pushes to none.  `-i --keep HOME`
+#  keeps the runner's own tools off the PATH, as in check.yml.  A newer push
+#  to a pull request cancels the run it supersedes; a run on main is never
+#  cancelled.
+#
+# =============================================================================
+
+name: lean
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: lean-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    name: The options check, its cases and the plan's lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v32
+
+      - name: The lean check
+        run: |
+          set -euxo pipefail
+          nix develop .#lean -i --keep HOME --command make check-lean
