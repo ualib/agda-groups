@@ -6,14 +6,17 @@ The companion note to [ADR 0001], which records the decisions; this note
 explains them and records the search of prior formalizations behind them.
 It describes the design that M2-2 to M2-4 ([#6], [#7], [#8]) implement,
 as the spike of issue [#5] built it.  The spike is the scratch modules
-under `spike/` at commit [`c86d93e`]; the pull request that adds this
-note removes them before the merge, and `spike/README.md` at that commit
-has their map and timings.
+under `spike/`, at two commits: [`c86d93e`], which built the finite
+groups and the tables, and [`1996be2`], which added the setoid route of
+§§ 3 to 5 beside them.  The pull request that adds this note removes
+them before the merge, and `spike/README.md` at the second commit has
+their map and timings.
 
 The names in `code` that the spike defines are in the modules
 `Spike.Finite`, `Spike.Counting`, `Spike.Constructions`,
-`Spike.SubgroupEnumeration`, `Spike.TableGroups`, `Spike.Sylow` and
-`Spike.Rules`; the library's own names, in M2-2 to M2-4, may differ.
+`Spike.SubgroupEnumeration`, `Spike.TableGroups`, `Spike.Sylow`,
+`Spike.Rules`, `Spike.Setoid`, `Spike.Generated` and `Spike.SetoidRules`;
+the library's own names, in M2-2 to M2-4, may differ.
 
 ## 1.  Finite sets, constructively
 
@@ -91,7 +94,7 @@ each finite group is given its enumeration where it is made, as follows:
    `TableGroup` and the examples of `Examples.Classical.Groups`) has the
    identity enumeration, whose index map is the identity;
 +  a subgroup, as a finite group in its own right, has the enumeration by
-   the positions of its table (§ 6);
+   the indices of G that its decider accepts (§ 6);
 +  a quotient G/N is given one by M3-6 ([#14]), whose index map
    normalizes no proof (least representatives are one way); the spike's
    quotient used deduplication (§ 6);
@@ -114,69 +117,106 @@ subgroups in 2,203 ms against 1,057 ms for A₄ itself (§ 8).  Groups of
 permutations of `Fin n` were not tried; Cayley's theorem (M2-4) passes
 to them.
 
-## 3.  Subgroups as tables
+## 3.  Subgroups
 
-A **subgroup** of a finite group G of order n is a table χ, a `Subset n`
-over the index set of G's enumeration, with a proof of its closure, as
-follows:
+A **subgroup** of a finite group G is agda-algebras' `DecSubgroup`: a
+predicate H on G's carrier, a proof that it is a subgroup (`IsSubgroup
+H`: H respects `≈` and is closed under the operations), and a *decider*
+of its membership, `∀ x → Dec (x ∈ H)`.  The names below are those of
+`Spike.Setoid` and `Spike.Generated` at [`1996be2`].
 
-    Subgroup G = Σ[ χ ∈ Subset n ] True (closed? χ)
++  **Order, inclusion and equality**.  The order of H counts the indices
+   whose elements its decider accepts (`orderˢ`).  H ⊆ K is decided at
+   the n enumerated elements and carried to every x by the respects
+   fields, through `idx x` (`_⊆?_`); H ≐ K, the two inclusions, is
+   decided as both (`_≐?_`); and a failed inclusion yields an index whose
+   element lies in H and not in K, by a search (`⊈-witness`).  So the
+   decidable subgroups of a finite group form a discrete setoid under
+   `≐`, in the sense of § 1.
++  **The universe level**.  A decidable subgroup at level ℓ is a
+   predicate with its proofs, so the type of them lies in `Type (α ⊔ ρ ⊔
+   suc ℓ)`, a universe above G's carrier.  A setoid of subgroups, such as
+   Syl_p(G) (§ 5), lies there too, and M2-2 takes its finite setoids at
+   any level.
++  **Constructions**.  The preimage of H under conjugation by g, {x | g x
+   g⁻¹ ∈ H}, is a subgroup for every H, by agda-algebras' laws of
+   conjugation (`Conjugate`: conjugation by g is an endomorphism)
+   (`preˢ`); the conjugate g H g⁻¹ is the preimage under g⁻¹
+   (`conjugateˢ`); and the normalizer is the textbook predicate,
+   "conjugation by g and by g⁻¹ maps H into H", a subgroup by one proof
+   for every H (`Normalizes`, `normalizes-isSubgroup`).  Each comes with
+   its textbook decider: the preimage's asks H's at g x g⁻¹, and the
+   normalizer's tests every enumerated element of H.
 
-+  **Membership**: `x ∈ (χ , _) = T (lookup χ (idx x))`, the entry of χ
-   at the position of x; it respects `≈`, by `idx-cong`.
-+  **The closure check** `closed? χ` decides three conditions on
-   positions: the identity is in χ, and products and inverses of members
-   are members.  `True d` is agda-stdlib's `T (isYes d)`, the type of
-   proofs that the decision d said yes: `⊤` or `⊥`, so any two of its
-   proofs are equal with no axiom (`T-irrelevant`).
-+  **The order** of a subgroup is the number of its entries that are
-   true, agda-stdlib's `∣ χ ∣`.
-+  **Equality**.  Two subgroups with the same elements have the same
-   table, entry by entry (at position i, the element `e[ i ]`), and two
-   vectors with the same entries are equal (`tabulate∘lookup`,
-   `tabulate-cong`); their closure proofs are equal by `T-irrelevant`.
-   So `same-elements→≡` proves `H ≡ K` from the two inclusions, with no
-   axiom, and `_≟ᵗ_` decides `H ≡ K` by comparing vectors.
-+  **The universe level**.  A table is a vector of Booleans, so
-   `Subgroup G : Type` (that is, `Set₀`) whatever the levels α and ρ of
-   G.
-+  **The finite set of subgroups**.  The library's subgroups of G are the
-   closed tables among the 2ⁿ subsets of `Fin n`, so they form a finite
-   set, and so does every decidable family of them (the Sylow
-   p-subgroups, the normal subgroups, the subgroups between two).  The set
-   exists as a definition; enumerating it is feasible only for small n
-   (§ 5).  It is the set of agda-algebras' decidable subgroups up to `≐`,
-   through `toDec` and `fromDec`, and not of every predicate subgroup,
-   which need not be decidable (§ 4).
-+  **agda-algebras' subgroups**.  `toDec` makes a table into
-   agda-algebras' `DecSubgroup` (a predicate with `IsSubgroup` and a
-   decider, at level `0ℓ`), and `fromDec` makes any `DecSubgroup`, at any
-   level, into its table: the decisions on the enumeration, with closure
-   proved from `IsSubgroup`.  The round trips are `fromDec (toDec H) ≡ H`
-   and `toDec (fromDec H) ≐ H` (each predicate contained in the other).
-   So agda-algebras' theorems about predicates (cosets, Dedekind's law,
-   conjugation, complements) apply to tables through `toDec`, and its
-   constructions (centralizers, normal closures, intersections) come back
-   through `fromDec`.  Two decidable subgroups are `≐` exactly when their
-   tables are equal (`≐→table≡`, `table≡→≐`), so `≐` is decidable too
-   (`≐?`).
+**Subgroups by generators**.  GAP makes a subgroup from generators
+(`Subgroup(G, gens)`, [GAP] `lib/grp.gd:3946-3956`), computes its
+structure when asked, and tests the inclusion of one group in another on
+the generators (`lib/magma.gi:1232-1238`).  `Spike.Generated` does the
+same, as follows:
 
-This is MathComp's representation in Agda (§ 9.1).  In MathComp a finite
-set of a finite type is a `FinSet` of a finite function, a tuple of
-Booleans over the type's enumeration, and a group is such a set with a
-Boolean closure test, `group_set`.  Its designers began with sets as
-characteristic functions and changed to these tables for quotients:
-"Having sets for which function extensionality does not hold had forced
-us to use setoid. ... Using intensional sets has simplified everything"
-([GMRTT], § 3.3).  Under `--without-K --safe` the same holds here: a
-predicate subgroup has no extensional equality, and a table has it by
-computation.
++  **Words**.  For a list A of elements of G, a *letter* is an element of
+   A or its inverse (an index into A and a Boolean), a *word* is a list of
+   letters, and `eval` multiplies a word out.  x lies in ⟨A⟩ when some
+   word evaluates to x (`InGen A x = Σ[ w ∈ Word ] eval w ≈ x`): the
+   textbook's description of the subgroup generated by A, and a proof of
+   membership carries its word.  It is a subgroup: the product of two
+   words is their concatenation, and the inverse of a word is its letters
+   flipped, in the opposite order.
++  **The universal property**: a subgroup that holds every element of A
+   holds ⟨A⟩, by induction on words (`gen⊆`).  It is the textbook's
+   "least subgroup that holds A", stated without a quantifier over all
+   subgroups.
++  **The Schreier vector**: for each index of G, a word that reaches it,
+   or nothing.  A breadth-first search over the letters computes it from
+   the identity, as GAP's orbit algorithm computes an orbit with its
+   transversal (a stabilizer chain keeps such a Schreier tree,
+   `lib/stbc.gd:760-775`).  Three checks make it a *certificate*
+   (`Cert`): the identity's index is reached; the reached indices are
+   closed under right multiplication by every letter; and every word
+   evaluates to the element at its index.  Each check is decidable, and a
+   concrete group discharges it by evaluation, so nothing rests on the
+   search being right: a wrong search fails to type-check.
++  **The decider**.  x is in ⟨A⟩ when the vector holds a word at `idx x`,
+   and the third check makes that word the proof.  When the vector holds
+   nothing there, the first two checks show, by induction on words, that
+   every word evaluates to a reached index, so no word reaches x.
++  **Decisions by the generators alone**, from the universal property:
+   ⟨A⟩ ⊆ K exactly when every element of A lies in K (`gen⊆?`), |A|
+   questions to K's decider where the enumeration asks n; g normalizes
+   ⟨A⟩ exactly when g a g⁻¹ and g⁻¹ a g lie in ⟨A⟩ for every a in A
+   (`normalizesGen?`, the universal property applied to the preimages of
+   ⟨A⟩ under conjugation); and g⟨A⟩g⁻¹ ⊆ h⟨A⟩h⁻¹ exactly when every g a
+   g⁻¹ lies in h⟨A⟩h⁻¹ (`conjGen⊆?`).  The normalizer by generators is
+   the textbook predicate with the faster decider (`normalizer⟪⟫`).
++  **Certificates in records**.  `Generators` holds a list, its Schreier
+   vector and its certificate, and `Adjoined B` the certificates of every
+   ⟨x, B⟩, x in G.  A function of a subgroup takes the record, so that no
+   certificate stands in a type at a call: there Agda compares it with
+   another spelling of itself by evaluating both, and under a bound
+   variable it evaluates them symbolically.  Passed that way, the 60
+   certificates of the ⟨x, t⟩ in A₅ exhausted the 6 GB heap in 49 s; in
+   the record they cost their own check, 3,982 ms (§ 8).
 
-A table is canonical only over an enumeration that lists each element
-once.  Over a surjective enumeration with repetitions, two tables that
-differ at two indices naming one element would denote the same subgroup;
-the irredundant enumeration rules that out, and `ienum-inj` is the step
-of `same-elements→≡` that uses it.
+**Tables** (§ 1) were the first spike's subgroups: a `Subset n` over the
+enumeration with a Boolean closure check, `Σ[ χ ∈ Subset n ] True
+(closed? χ)` (`Spike.Finite` at [`c86d93e`]).  Two tables with the same
+elements are equal, `≡`, with no axiom (`same-elements→≡`), and the
+tables of G form a finite set, the closed ones among the 2ⁿ subsets.
+That is MathComp's representation (§ 9.1), whose designers moved from
+characteristic functions to Boolean tables because the former "had
+forced us to use setoid" ([GMRTT], § 3.3), for quotients.  Here
+quotients are setoid quotients on the same carrier (§ 6), and tables
+keep two roles, as follows:
+
++  `memo H` remembers a decider as its table, `toDec (fromDec H)`, with
+   `memo H ≐ H` (`toDec∘fromDec`): a decider is a function, and Agda does
+   not remember what a function has answered, so a computation that asks
+   one decider many questions asks it once per index instead;
++  a search over all 2ⁿ subsets decides statements about every subgroup
+   of the smallest groups (S₃ has 64 subsets, A₅ 2⁶⁰).
+
+The first spike's `toDec` and `fromDec` pass between the two, with
+`fromDec (toDec H) ≡ H` and `toDec (fromDec H) ≐ H`.
 
 ## 4.  The two rules for the types of subgroups
 
@@ -190,110 +230,132 @@ The plan states two rules for any type of subgroups under `--without-K
    subgroup proves excluded middle, since a subgroup can be built from an
    arbitrary proposition, so such a premise carries a witness instead.
 
-Both are facts about subgroups that are predicates.  `Spike.Oracle`
-checks the second on S₃: for any proposition P, the predicate "x is 1,
-or P holds and x is in A₃" is a subgroup between 1 and A₃, so the premise
-"every subgroup L between 1 and A₃ lies in 1 or contains A₃", over
-agda-algebras' subgroups, proves `P ⊎ ¬ P` (`disjunctive→LEM`).
+Both are facts about subgroups that are predicates.  `Spike.Oracle` (at
+[`c86d93e`]) checks the second on S₃: for any proposition P, the
+predicate "x is 1, or P holds and x is in A₃" is a subgroup between 1
+and A₃, so the premise "every subgroup L between 1 and A₃ lies in 1 or
+contains A₃", over agda-algebras' subgroups, proves `P ⊎ ¬ P`
+(`disjunctive→LEM`).
 
-Tables meet both rules by construction.  Two tables with the same
-elements are `≡` (§ 3).  A table cannot be built from an arbitrary
-proposition, since each entry is a Boolean, and a statement about every
-table between two is decidable: `between₂?` decides "every subgroup
-between H and K is H or K" over the closed tables among the 2ⁿ subsets
-(agda-stdlib's `anySubset?`), and on S₃ it says yes between 1 and A₃
-and no between 1 and S₃, which has ⟨s⟩ between, in 25 ms
-(`Spike.RulesExamples`).
+Decidable subgroups meet both rules.  Equality is `≐`, the pair of
+inclusions, and it is decided (§ 3).  The subgroup that the oracle
+builds is decidable only when P is, so a disjunction about every
+*decidable* subgroup decides nothing new, and a statement over the
+library's subgroups may end in one.
 
-So statements over tables use `≡` and may end in such disjunctions, and
-the two rules stay for agda-algebras' predicates.  The witnessed form,
-"a subgroup between H and K that holds an element outside H contains K",
-quantified over agda-algebras' decidable subgroups, is equivalent to the
-disjunctive form over tables, constructively, for every finite group
-(`tables→witnessed`, `witnessed→tables` in `Spike.Rules`): one direction
-passes a decidable subgroup to its table, the other finds the witness by
-a search of `Fin n`.  A statement can therefore be given in both forms,
-with the passage between them proved once.
+**The generator condition** makes such a disjunction provable for a
+concrete group.  For H = ⟨B⟩ and a decidable K, the condition is that
+every element x of K outside H generates K together with B, K ⊆ ⟨x, B⟩
+(`Generates`, in `Spike.SetoidRules` at [`1996be2`]).  A search decides
+it (`generates?`), with one ⟨x, B⟩ for each x, whose certificates
+`Adjoined B` holds.  From it, every decidable subgroup L between H and K,
+at any level, is H or K (`between`): L ⊆ H is decided; if it fails,
+`⊈-witness` finds an x in L outside H, x is in K, and ⟨x, B⟩ ⊆ L by the
+universal property, since L holds x and B; so L holds K.  Conversely,
+when H ⊆ K, the disjunction for the subgroups ⟨x, B⟩ gives the condition
+(`generates`).  So over decidable subgroups the disjunctive form and the
+plan's witnessed form are equivalent, constructively.
+
+`Spike.SetoidRulesExamples` decides the condition on S₃ (yes between 1
+and A₃; no between 1 and S₃, which has ⟨s⟩ between) and on A₅, between
+⟨t⟩ and A₄, where it shows ⟨t⟩ maximal in A₄ in 93 ms after 3,982 ms of
+certificates (§ 8).  The first spike decided the case of S₃ by tables,
+over its 64 subsets (`between₂?`, in 22 to 25 ms); for A₅ that search
+would run over 2⁶⁰.
 
 ## 5.  Counting
 
 Every count is a natural number that Agda computes by evaluation (a check
 by `refl`), as follows:
 
-+  **the order** of a group, `icard`, and of a subgroup, `∣ χ ∣`;
-+  **the index** of a subgroup K, twice: as the size of agda-algebras'
-   coset space G/K (`cosetAlgebra-FiniteAlgebra`: G's enumeration with
-   the coset relation, decidable through K's table), whose irredundant
-   enumeration agda-algebras computes; and as the number of distinct left
-   cosets gK as tables (`index` and `indexᵗ` in `Spike.Counting`);
-+  **the conjugates** of a subgroup H: the tables of g H g⁻¹ for the n
-   elements g, deduplicated by comparing vectors (`#conjugates`);
-+  **the normalizer** of H, as a table: the g with g H g⁻¹ inside H,
-   decided by a sweep (`normalizer`).
++  **the order** of a group, `icard`, and of a subgroup, the indices its
+   decider accepts;
++  **the index** of a subgroup K, twice: as the number of left cosets x K
+   counted by their first members, the indices i with no smaller j such
+   that e[j]⁻¹ e[i] ∈ K (`indexˢ`, through `#classes`); and as the size of
+   agda-algebras' coset space G/K (`cosetAlgebra-FiniteAlgebra`: G's
+   enumeration with the coset relation, decided by K's decider), whose
+   irredundant enumeration agda-algebras computes (`indexᶜ`);
++  **the conjugates** of a subgroup H: G's elements, deduplicated by the
+   conjugate each gives, g and h the same when g H g⁻¹ ≐ h H h⁻¹, decided
+   by the generators when H has them (`#conjugates⟪⟫`).  The classes are
+   the left cosets of N_G(H), so the conjugates of H form the finite
+   setoid G/N_G(H), on which G acts by left multiplication;
++  **the normalizer** of H, as a decidable subgroup, by the textbook
+   decider or by the generators.
 
 **The number nₚ of Sylow p-subgroups** has two forms ([ADR 0001], § 5:
-both forms of a definition, the classical first), as follows:
+both forms of a definition, the textbook's first), as follows:
 
-+  **the classical form**: nₚ is the number of subgroups of order pᵃ, where
-   pᵃ is the largest power of p dividing |G|, that is, the size of the
-   finite set Syl_p(G) of § 3, as Aschbacher defines it ([Aschbacher],
-   § 6, p. 19: "Write Syl_p(G) for the set of Sylow p-subgroups of G")
-   and as MathComp, Mizar, HOL Light and Metamath count it (§ 9);
-+  **the computed form**: the number of conjugates of one Sylow
++  **the textbook form**: with pᵃ the largest power of p dividing |G|, nₚ
+   is the size of the finite setoid Syl_p(G) of the decidable subgroups
+   of order pᵃ under `≐`, as Aschbacher defines it ([Aschbacher], § 6, p.
+   19: "Write Syl_p(G) for the set of Sylow p-subgroups of G") and as
+   MathComp, Mizar, HOL Light and Metamath count it (§ 9); its size is
+   the length of an irredundant enumeration of it;
++  **the computed form**: the number of distinct conjugates of one Sylow
    p-subgroup P in hand, or the index of its normalizer, |G : N_G(P)|.
 
 Aschbacher's Sylow's Theorem (3) is that they agree: |Syl_p(G)| = |G :
 N_G(P)| ≡ 1 (mod p).  The number of conjugates of P is |G : N_G(P)| by
 the orbit-stabilizer theorem (Aschbacher (5.12)), and it is |Syl_p(G)|
 because G is transitive on Syl_p(G), by conjugation (Sylow's Theorem
-(2)).  `Spike.Sylow` types the theorem both ways: `Sylow₃ᵗ` over tables,
-with the classical nₚ, and `Sylow₃ᵈ` over decidable subgroups, where
-there is no finite set of subgroups to count, so the statement adds that
-every Sylow p-subgroup is a conjugate of P.
+(2)), which also gives Syl_p(G) its enumeration, by the conjugates of P.
+`Spike.Sylow` (at [`c86d93e`]) types the theorem both ways.
 
-What evaluation can reach, measured (§ 8), is as follows:
+What evaluation reaches, measured (§ 8), is as follows:
 
-+  the classical nₚ ranges over all 2ⁿ subsets: for V₄ (16 subsets) and
-   S₃ (64) Agda computes n₂(S₃) = 3 and n₃(S₃) = 1 in 22 ms, but for A₅
-   it would range over 2⁶⁰ subsets;
-+  the computed form needs one Sylow subgroup in hand: for A₅, the
-   distinct conjugates of the Sylow 5-, 3- and 2-subgroups number 6, 10
-   and 5 (about 0.65 s each), and the indices of their normalizers (of
-   orders 10, 6 and 12) are 6, 10 and 5 (about 0.1 s each by the coset
-   space, 0.5 s by coset tables).
++  **the computed form**, for every p: on A₅ the distinct conjugates of
+   the Sylow 5-, 3- and 2-subgroups number 6, 10 and 5, in 167, 206 and
+   169 ms by generators (by tables, 635 to 649 ms each), and the indices
+   of their normalizers (of orders 10, 6 and 12) are 6, 10 and 5;
++  **the textbook form**, by a search through generated subgroups: a
+   subgroup of prime order is ⟨x⟩ for each of its elements x other than
+   1 (by Lagrange's theorem, M3-1), so when p² does not divide |G| the
+   distinct cyclic subgroups of order p are Syl_p(G).  On A₅, |Syl₅(A₅)|
+   = 6 and |Syl₃(A₅)| = 10 in 308 and 204 ms, after 632 ms for the 60
+   certificates of the ⟨x⟩ (`Spike.A5.Cyclic`); on S₃, n₂ = 3 and n₃ = 1
+   in under 10 ms.  The tables' search over all subsets reaches S₃ (64
+   subsets, in 21 to 22 ms) and not A₅ (2⁶⁰).
 
-So a concrete group's nₚ is computed through Sylow's third theorem: the
-computed form evaluates, and the theorem equates it with the classical
-one.  Enumerating the subgroups of A₅ by generators (each of its 59
-subgroups is generated by two elements) is another route, not tried.
+A₅'s Sylow 2-subgroups are Klein four-groups, not cyclic, so the textbook
+search for them adjoins a second generator to a cyclic subgroup, as GAP's
+cyclic extension builds a group's subgroups ([GAP], `lib/grplatt.gd`);
+it was not tried.
 
 ## 6.  Subgroups and quotients as finite groups
 
-**A subgroup as a finite group** (`Constructions.AsGroup`).  The carrier
-is the subtype of the members, `Σ[ x ∈ G ] x ∈ H`, compared in G; the
-operations are G's, closed by the table's closure; the five equations
-are G's (agda-algebras' `setoidEqsToGroup`).  Two enumerations of it
-were built, as follows:
+**A subgroup as a finite group** (`Constructions.AsGroup` at
+[`c86d93e`]).  The carrier is the subtype of the members, `Σ[ x ∈ G ] x
+∈ H`, compared in G; the operations are G's, closed by H's closure; the
+five equations are G's (agda-algebras' `setoidEqsToGroup`).  Two
+enumerations of it were built, as follows:
 
 +  a surjective enumeration by all n indices of G, sending an index
    outside H to the identity, from which agda-algebras' deduplication
    computes the order (A₄ inside A₅: 12; A₃ and ⟨s⟩ inside S₃: 3 and 2);
-+  the irredundant enumeration by the **positions** of H's table, the
-   indices it holds in increasing order (`SubgroupEnumeration.Positions`),
-   whose index map walks G's index set once.
++  the irredundant enumeration by the indices of G whose elements H
+   holds, in increasing order (`SubgroupEnumeration.Positions`, which
+   read them off H's table: the indices its decider accepts), whose index
+   map walks G's index set once.
 
-Through the positions enumeration, A₄ is a finite group of order 12 in
-which the Sylow 3-subgroup ⟨(0 1 2)⟩ has 4 conjugates, its normalizer has
-order 3, and the Sylow 2-subgroup is normal: Sylow's theorems applied
-inside a subgroup, counted in 1,057 ms (`Spike.A4Examples`).
+Through the second, A₄ is a finite group of order 12 in which the Sylow
+3-subgroup ⟨(0 1 2)⟩ has 4 conjugates, its normalizer has order 3, and
+the Sylow 2-subgroup is normal: Sylow's theorems applied inside a
+subgroup, counted in 1,057 ms (`Spike.A4Examples`).  A count inside a
+subgroup needs no group built on it: the same counts inside A₅, by
+generators, with the conjugates deduplicated over A₄'s elements, took 36
+ms (`Spike.A5.Setoid` at [`1996be2`]).  The subgroup as a group serves a
+theorem about finite groups applied to a subgroup.
 
-**The quotient by a normal subgroup** (`Constructions.Quotient`).  For a
-table N whose normality is decided by a sweep (`normal?`), the quotient
-G/N is agda-algebras' `Group` on the same carrier with the coarser
-equality x ∼ y when x y⁻¹ ∈ N (agda-algebras' `NormalCon`, the
-congruence of a normal subgroup), and its `FiniteAlgebra` witness is G's
-own enumeration, decided by one lookup in N's table.  No representative
-is chosen until the order is counted, as agda-algebras' ADR 008 prefers
+**The quotient by a normal subgroup** (`Constructions.Quotient` at
+[`c86d93e`]).  For a decidable subgroup N whose normality is decided (by
+a sweep, `normal?`, or by its generators), the quotient G/N is
+agda-algebras' `Group` on the same carrier with the coarser equality x ∼
+y when x y⁻¹ ∈ N (agda-algebras' `NormalCon`, the congruence of a normal
+subgroup), and its `FiniteAlgebra` witness is G's own enumeration,
+decided by N's decider.  No representative is chosen until the order is
+counted, as agda-algebras' ADR 008 prefers
 ([`008-two-layer-congruence-discipline.md`]).  Its deduplication gives
 the orders |S₃/A₃| = 2, |V₄/⟨1⟩| = 2 and |A₅/1| = 60, and its
 re-tabulation is the group of order 2 (`Spike.ConstructionExamples`,
@@ -309,31 +371,36 @@ Lagrange's theorem chooses its transversal, § 9.9).
 
 +  M2-2 ([#6]): `Groups.Finite.Setoid`, a setoid with an irredundant
    enumeration (`FiniteSetoid`, the four fields of agda-algebras'
-   `IrredundantEnumeration` for a setoid that is not an algebra), with
-   sizes, bijections and the pigeonhole principle; `Groups.Finite.Subset`,
-   detachable subsets as tables, with their sizes; `Groups.Finite.Sum`,
-   sums and products, partitions, and sums modulo p;
+   `IrredundantEnumeration` for a setoid that is not an algebra), at any
+   universe level, with sizes, bijections and the pigeonhole principle;
+   `Groups.Finite.Subset`, detachable subsets as tables, with their
+   sizes; `Groups.Finite.Sum`, sums and products, partitions, and sums
+   modulo p;
 +  M2-3 ([#7]): `Groups.Finite.Group` (`FiniteGroup`, its order, index
    map, decidable equality, `fromFiniteAlgebra`, `toFiniteAlgebra`);
-   `Groups.Subgroup` (subgroups as tables: membership, inclusion,
-   equality, order, `toDec`, `fromDec`, and the finite set of subgroups);
-   `Groups.Subgroup.Group` (a subgroup as a finite group, by positions);
-   `Groups.Subgroup.Notions` (normal subgroups, abelian groups, powers,
-   elementary abelian p-groups, the subgroups between two, complements,
-   minimal normal subgroups);
+   `Groups.Subgroup` (agda-algebras' `DecSubgroup` as the library's
+   subgroups: membership, order, inclusion and equality decided, the
+   witness of a failed inclusion, conjugates and normalizers with their
+   textbook deciders, and `memo`); `Groups.Subgroup.Generated` (words,
+   the generated subgroup and its universal property, Schreier vectors
+   and their certificates, `Generators` and `Adjoined`, and the
+   decisions by generators); `Groups.Subgroup.Group` (a subgroup as a
+   finite group); `Groups.Subgroup.Notions` (normal subgroups, abelian
+   groups, powers, elementary abelian p-groups, the subgroups between two
+   with the generator condition, complements, minimal normal subgroups);
 +  M2-4 ([#8]): `Groups.Table` (groups on `Fin n`, re-tabulation, and
    agda-algebras' examples as finite groups); `Groups.Cyclic`,
    `Groups.Symmetric`, `Groups.Cayley`.
 
 ## 8.  What the spike measured
 
-The record run is `bash spike/check.sh` at [`c86d93e`] on 2026-11-26, in
-the dev shell (Agda 2.9.0 and agda-stdlib 2.4.1 from agda-algebras at
-`66c324f8`, on a 12th Gen Intel Core i9-12900H): the 17 modules it lists
-checked from scratch in 1 minute 22 seconds, each under `--without-K
---exact-split --safe` with no postulate, and the options check of M1-1
-passed over all 18 modules of `spike/`.  The times are Agda's own, by
-`--profile=definitions`, as follows:
+**The first record run** is `bash spike/check.sh` at [`c86d93e`] on
+2026-11-26, in the dev shell (Agda 2.9.0 and agda-stdlib 2.4.1 from
+agda-algebras at `66c324f8`, on a 12th Gen Intel Core i9-12900H): the 17
+modules it lists checked from scratch in 1 minute 22 seconds, each under
+`--without-K --exact-split --safe` with no postulate, and the options
+check of M1-1 passed over all 18 modules of `spike/`.  The times are
+Agda's own, by `--profile=definitions`, as follows:
 
 | Check | Given enumeration | Deduplicated enumeration |
 | --- | ---: | ---: |
@@ -360,6 +427,40 @@ not measured: `Spike.A5.Derived`, which makes them, was stopped by
 the conjugates of one subgroup alone (60 tables of 60 lookups) would take
 about 21 minutes.  In three earlier runs the same day one lookup took
 194, 195 and 182 ms, and the 60 lookups 23,621, 23,641 and 20,960 ms.
+
+**The second record run** is `bash spike/check.sh` at [`1996be2`], later
+the same day on the same machine and toolchain: the 24 modules it lists,
+the 17 and seven for the setoid route, checked from scratch in 1 minute
+50 seconds, and the options check passed over all 25 modules of
+`spike/`.  Its times, with the first spike's modules rerun in the same
+run, are in the table below, whose columns give a subgroup in three
+ways, as follows:
+
++  **tables**: the first spike's modules;
++  **deciders composed**: subgroups by the deciders of their tables, with
+   conjugates and normalizers built from them and never remembered, or
+   remembered by `memo` where the row says so;
++  **generators**: subgroups by generators with a checked Schreier
+   vector, each decision made by the generators alone.
+
+| Check (on A₅ unless the row says otherwise) | Tables | Deciders composed | Generators |
+| --- | ---: | ---: | ---: |
+| Building ⟨s⟩, ⟨t⟩, V and A₄: the closure check, or the certificate | 151, 142, 163, 170 ms | | under 10, under 10, under 10, 12 ms |
+| The distinct conjugates of the Sylow 5-, 3- and 2-subgroups (6, 10, 5) | 644, 649, 635 ms | 2,314 ms (the first) | 167, 206, 169 ms |
+| The orders of their normalizers (10, 6, 12) | 190 ms (the three), after 242, 246, 297 ms of closure checks | 90, 61, 81 ms | 21, 12, 22 ms |
+| The indices of the normalizers, by agda-algebras' coset space (6, 10, 5) | 114, 129, 92 ms | 388 ms (the first); remembered, 115, 109, 93 ms | 94, 130, 74 ms |
+| The same indices, as distinct coset tables, or as cosets counted by first members | 613, 562, 595 ms | | 61, 161, 95 ms |
+| A₄ in A₅: n₃(A₄) = 4 and V normal in A₄, by conjugates | 1,044 ms (A₄ by positions); 2,041 ms (A₄ on `Fin 12`) | | 36 ms, with no group built on A₄ |
+| The textbook counts \|Syl₅(A₅)\| = 6 and \|Syl₃(A₅)\| = 10 | out of reach (2⁶⁰ subsets) | | 308, 204 ms, after 632 ms for the 60 certificates of the ⟨x⟩ |
+| S₃: the textbook counts n₂ = 3 and n₃ = 1 | 21 ms (64 subsets) | | under 10 ms |
+| S₃: every subgroup between 1 and A₃ is 1 or A₃, decided | 22 ms (64 subsets) | | under 10 ms |
+| A₅: every subgroup between ⟨t⟩ and A₄ is ⟨t⟩ or A₄, decided | out of reach (2⁶⁰ subsets) | | 93 ms, after 3,982 ms for the 60 certificates of the ⟨x, t⟩ |
+
+"Under 10 ms" marks a check the profile did not list; it listed no
+entry under 10 ms in either run.  A blank cell was not measured.  In the
+same run the index map through deduplication took 171 ms for one lookup
+and 19,653 ms for sixty, against 31 ms for sixty through the given
+enumeration.
 
 ## 9.  The search of prior formalizations
 
@@ -531,7 +632,8 @@ UniMath/agda-unimath, `master` at `c0022bfc` (2026-11-16), under
 
 +  **The Symmetry book** (Bezem, Buchholtz, Cagne, Dundas and Grayson;
    UniMath/SymmetryBook, `master` at `cdc1dc87`, 2026-11-09), read for
-   its ideas, since its groups need univalence, which the flags exclude.
+   its ideas, since its groups need univalence, which the flags can
+   neither prove nor postulate.
    A group is a pointed connected groupoid, a finite group one whose
    symmetries form a finite set (`fingp.tex:57`), and a subgroup a
    pointed transitive G-set, so that the subgroups form a set
@@ -576,8 +678,10 @@ UniMath/agda-unimath, `master` at `c0022bfc` (2026-11-16), under
    `propext` in Mathlib; univalence in agda-unimath, cubical, the 1lab
    and TypeTopology), except MathComp, which gets it from Boolean tables
    over an enumeration.  The `--safe --without-K` Agda developments state
-   no equality of subgroups.  Tables are the one design that meets the
-   first rule under this library's flags.
+   no equality of subgroups.  Tables are the one design that makes
+   equality of subgroups `≡` under this library's flags; this library
+   meets the first rule instead with `≐`, which its finite groups decide
+   (§ 4).
 +  **Decidability**.  agda-unimath takes a finite subgroup of a finite
    group to be a decidable subgroup (`Subgroup-Finite-Group`), beside its
    subgroups of any group, which are subtypes; and the Symmetry book's
@@ -648,7 +752,12 @@ October 2023; the MathComp book [MC] from Zenodo.
 +  [MC]: A. Mahboubi and E. Tassi, *Mathematical Components*, Zenodo,
    2022, doi 10.5281/zenodo.7118596, §§ 7.3 to 7.6 (finite types, finite
    functions, finite sets).
-+  [ADR 0001]; the plan, [`GITHUB_PROJECT.md`]; the spike, [`c86d93e`].
++  [GAP]: The GAP Group, *GAP: Groups, Algorithms, and Programming*,
+   <https://www.gap-system.org>, read in its source at `master`,
+   `407bf981` (2026-11-26): [`lib/grp.gd`], [`lib/magma.gi`],
+   [`lib/stbc.gd`], [`lib/grplatt.gd`].
++  [ADR 0001]; the plan, [`GITHUB_PROJECT.md`]; the spike, at
+   [`c86d93e`] and [`1996be2`].
 +  agda-algebras at `66c324f8`: [`Setoid.Algebras.Finite`],
    [`Setoid.Algebras.Finite.Irredundant`],
    [`Classical.Structures.Group.Basic`], and its ADR 008,
@@ -657,6 +766,11 @@ October 2023; the MathComp book [MC] from Zenodo.
 [ADR 0001]: ../adr/0001-finite-groups.md
 [`GITHUB_PROJECT.md`]: ../GITHUB_PROJECT.md
 [`c86d93e`]: https://github.com/ualib/agda-groups/tree/c86d93e2796e7568962b6eaa94b6efce1b31e15f/spike
+[`1996be2`]: https://github.com/ualib/agda-groups/tree/1996be2fb8250b67d55debb0b7335699cab2eb58/spike
+[`lib/grp.gd`]: https://github.com/gap-system/gap/blob/407bf9814f63742fe2a296a06582d568bf2c5d77/lib/grp.gd#L3946-L3956
+[`lib/magma.gi`]: https://github.com/gap-system/gap/blob/407bf9814f63742fe2a296a06582d568bf2c5d77/lib/magma.gi#L1232-L1238
+[`lib/stbc.gd`]: https://github.com/gap-system/gap/blob/407bf9814f63742fe2a296a06582d568bf2c5d77/lib/stbc.gd#L760-L775
+[`lib/grplatt.gd`]: https://github.com/gap-system/gap/blob/407bf9814f63742fe2a296a06582d568bf2c5d77/lib/grplatt.gd
 [#5]: https://github.com/ualib/agda-groups/issues/5
 [#6]: https://github.com/ualib/agda-groups/issues/6
 [#7]: https://github.com/ualib/agda-groups/issues/7
@@ -667,6 +781,7 @@ October 2023; the MathComp book [MC] from Zenodo.
 [MRR]: #references
 [GMRTT]: #references
 [MC]: #references
+[GAP]: #references
 [`Setoid.Algebras.Finite`]: https://github.com/ualib/agda-algebras/blob/66c324f89de176c2d5b4d3513d76034e4ffff2dd/src/Setoid/Algebras/Finite.lagda.md
 [`Setoid.Algebras.Finite.Irredundant`]: https://github.com/ualib/agda-algebras/blob/66c324f89de176c2d5b4d3513d76034e4ffff2dd/src/Setoid/Algebras/Finite/Irredundant.lagda.md
 [`Classical.Structures.Group.Basic`]: https://github.com/ualib/agda-algebras/blob/66c324f89de176c2d5b4d3513d76034e4ffff2dd/src/Classical/Structures/Group/Basic.lagda.md
