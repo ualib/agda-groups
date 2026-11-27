@@ -23,11 +23,15 @@
 #      and .deps/ (the shell's copy of the pinned agda-algebras, with its
 #      interfaces and the .source stamp the shell compares against the
 #      pin).  The key has two parts, as follows:
-#        - the agda-algebras node of flake.lock, which fixes agda-algebras,
-#          the Agda and the standard library together (nixpkgs follows
-#          it).  A move of that pin starts from nothing, since the shell
-#          replaces .deps/ and every interface is rebuilt anyway; a move
-#          of the plan engine's pin, the other input, keeps the entry.
+#        - the toolchain: a hash of two store paths, the Agda environment
+#          the shell runs (Agda and the standard library, with every input
+#          they are built from, transitive ones included) and the
+#          agda-algebras sources the shell copies to .deps/.  Store paths,
+#          not lock nodes: a change anywhere in their closure (an update
+#          of agda-algebras/nixpkgs or agda-algebras/agda alone, which
+#          leaves the agda-algebras node of flake.lock as it was, or an
+#          edit of flake.nix) moves them, and a change outside it (the
+#          plan engine's pin) does not, so it keeps the entry.
 #        - the sources (the library file and src/).  The restore key drops
 #          this part, so a run after a change to src/ restores the last
 #          entry for the pin and Agda checks only what changed (Agda
@@ -115,27 +119,24 @@ jobs:
             extra-substituters = https://formalverification.cachix.org
             extra-trusted-public-keys = formalverification.cachix.org-1:KG/AJuuli2F4/bA56rUYC9V8ZE/Zw6iZjxJEf40cQOo=
 
-      - name: The pinned Agda is in the cache
+      - name: The pinned Agda is in the cache, and the toolchain's key
+        id: toolchain
         if: steps.scope.outputs.agda == 'true'
         run: |
           set -euo pipefail
+          flake="(builtins.getFlake \"git+file://$PWD?shallow=1\")"
           agda=$(nix eval --raw --impure --expr \
-            "(builtins.getFlake \"git+file://$PWD?shallow=1\").inputs.agda-algebras.packages.x86_64-linux.default.outPath")
+            "$flake.inputs.agda-algebras.packages.x86_64-linux.default.outPath")
+          algebras=$(nix eval --raw --impure --expr "$flake.inputs.agda-algebras.outPath")
+          echo "Agda environment: $agda"
+          echo "agda-algebras:    $algebras"
           if nix path-info --store https://formalverification.cachix.org "$agda"; then
             echo "The pinned Agda is in the cache."
           else
             echo "::error::$agda is not in the formalverification cache"
             exit 1
           fi
-
-      - name: The cache key's pin
-        id: pin
-        if: steps.scope.outputs.agda == 'true'
-        run: |
-          set -euo pipefail
-          node=$(jq -c '.nodes["agda-algebras"].locked' flake.lock)
-          echo "$node"
-          echo "hash=$(printf '%s' "$node" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+          echo "hash=$(printf '%s %s' "$agda" "$algebras" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
 
       - name: Cache the interface files and the agda-algebras copy
         if: steps.scope.outputs.agda == 'true'
@@ -144,9 +145,9 @@ jobs:
           path: |
             _build/
             .deps/
-          key: agdai-${{ runner.os }}-${{ steps.pin.outputs.hash }}-${{ hashFiles('agda-groups.agda-lib', 'src/**/*.lagda.md', 'src/**/*.agda') }}
+          key: agdai-${{ runner.os }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('agda-groups.agda-lib', 'src/**/*.lagda.md', 'src/**/*.agda') }}
           restore-keys: |
-            agdai-${{ runner.os }}-${{ steps.pin.outputs.hash }}-
+            agdai-${{ runner.os }}-${{ steps.toolchain.outputs.hash }}-
 
       - name: Check the options, type-check the library and lint the plan
         if: steps.scope.outputs.agda == 'true'
