@@ -6,7 +6,7 @@ date: "2026-11-25"
 author: "the agda-groups development team"
 ---
 
-## Groups
+### Groups
 
 This is the `Groups` module of the agda-groups library: finite group theory
 in Agda, on the group theory of the [Agda Universal Algebra Library][].
