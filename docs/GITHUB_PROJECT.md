@@ -72,18 +72,22 @@ release (M6).
    states its types over it, which is why it comes first.
 +  **Two rules for the types of subgroups**.  Under `--without-K --safe`,
    two subgroups with the same elements are not propositionally equal, so
-   an equality of subgroups is stated as a pair of inclusions.  A premise
-   that ends in a disjunction about every subgroup proves excluded middle,
-   since a subgroup can be built from an arbitrary proposition, so such a
-   premise carries a witness instead: "a subgroup between H and K that
-   holds an element outside H contains K".  Every issue that states a type
-   respects both, whatever ADR 0001 decides.
+   an equality of subgroups is stated as a pair of inclusions (`≐`), which
+   a finite group decides.  A premise that ends in a disjunction about
+   every subgroup that is a predicate proves excluded middle, since such a
+   subgroup can be built from an arbitrary proposition, so such a premise
+   carries a witness instead: "a subgroup between H and K that holds an
+   element outside H contains K".  The library's subgroups are decidable
+   (ADR 0001), and a disjunction about every decidable subgroup proves no
+   excluded middle, so a statement over them may end in one.  Every issue
+   that states a type respects both rules.
 +  **Results named as textbooks name them**.  Each issue states what it
    proves as a textbook states it and cites the result by its number in
-   the books of the next section.  Choosing one of them as the main
-   reference, by whose numbers a statements module names the results (as
-   agda-lattices names those of Freese, Ježek and Nation), is William's
-   decision, deferred on 2026-11-25 to M6-1.
+   the books of the next section.  The main reference is Aschbacher's
+   *Finite Group Theory* (William, 2026-11-26, replacing the deferral to
+   M6-1 of 2026-11-25; recorded in ADR 0001): a module cites Aschbacher's
+   number first, and a statements module names the results by it (as
+   agda-lattices names those of Freese, Ježek and Nation).
 +  **Outside this plan**: Clifford's theorem, which is about modules over
    a field (Gorenstein 3.4.1), something neither library has yet
    (William, 2026-11-25).
@@ -390,7 +394,7 @@ graph TD
 
 <!-- BEGIN GENERATED: milestone-1 -->
 
-### Issue M1-1: The dev shell, the library file, the options check and make check (#2)
+### Issue M1-1: The dev shell, the library file, the options check and make check (#2, closed)
 
 **Labels**: `milestone-1-toolchain`
 
@@ -463,7 +467,7 @@ Two workflows replace the template's `ci.yml`, as follows (William's decision of
 
 What a contributor reads before writing a module, and what a citation of the library needs, as follows:
 
-+  **`CONTRIBUTING.md`**, after agda-lattices': how a contribution is checked; the layout (modules under `src/Groups/`, literate Agda in `.lagda.md` with front matter as agda-algebras' modules carry it); the flags and the options check; how a result is stated and cited (as a textbook states it, with its number in the books of the plan's [sources]); the two rules for the types of subgroups (an equality of subgroups as a pair of inclusions, and a witness in place of a disjunction about every subgroup), each with its reason; that agda-algebras' modules are imported, never copied; and what happens to a pull request.
++  **`CONTRIBUTING.md`**, after agda-lattices': how a contribution is checked; the layout (modules under `src/Groups/`, literate Agda in `.lagda.md` with front matter as agda-algebras' modules carry it); the flags and the options check; how a result is stated and cited (as a textbook states it, with its number in the books of the plan's [sources]); the representation of ADR 0001 (subgroups as decidable predicates, given by generators, with every certificate held in a record) and its two rules for the types of subgroups (an equality of subgroups as `≐`, a pair of inclusions; a disjunction about every subgroup only over decidable subgroups, and a witness in its place over predicates), each with its reason; that agda-algebras' modules are imported, never copied; and what happens to a pull request.
 +  **`CITATION.cff`**, validated, with the license, the repository, an abstract and keywords, as agda-lattices' has them; the DOI waits for the release (M6-3).
 +  **agda-mcp**, the Agda server for coding sessions, registered for this repository; its registration lives outside the repository.
 
@@ -544,7 +548,7 @@ The ADR decides at least the following: the type of finite groups and its relati
 
 ## Description
 
-The counting that every later issue uses, stated for finite setoids rather than for groups, since coset spaces, orbits, conjugacy classes, sets of tuples and sets of subgroups are all counted the same way.  On the notion of finiteness of ADR 0001, the following:
+The counting that every later issue uses, stated for finite setoids rather than for groups, since coset spaces, orbits, conjugacy classes, sets of tuples and sets of subgroups are all counted the same way.  A setoid of subgroups lies a universe above its group (ADR 0001, § 2), so the finite setoids are taken at any universe level.  On the notion of finiteness of ADR 0001, the following:
 
 +  **The size of a finite setoid**, a natural number, with a bijection between the setoid and `Fin` of its size.  Two setoids in bijection have the same size, and a one-to-one map from a finite setoid to one of the same size is onto (the pigeonhole principle; agda-stdlib's `Data.Fin.Properties.pigeonhole` states it for `Fin`).
 +  **Decidable subsets**: the size of a decidable subset and of its complement; a subset of a subset is no larger; and a subset of a subset with the same size contains it (equal, stated as inclusions).
@@ -577,10 +581,11 @@ agda-stdlib has the cases on `Fin` (`pigeonhole`, `*↔×`, `+↔⊎`, the sums 
 On the representation of ADR 0001 and the counting of M2-2, the following:
 
 +  **Finite groups**: the type, the order of a group, and the passage to agda-algebras' `Group` (or none, if ADR 0001 makes a finite group an agda-algebras `Group` with a finiteness witness), so that every module of `Classical.Structures.Group` applies.
-+  **Subgroups and their orders**: decidable subgroups and the order of each; the trivial subgroup has order 1 and the whole group its own order; and a decidable subgroup of a finite group is a finite group in its own right, so that a theorem about finite groups applies to a subgroup (a Sylow subgroup of a subgroup, a p-subgroup as a p-group).
++  **Subgroups and their orders**, as ADR 0001 (§ 2) decides: agda-algebras' decidable subgroups, with inclusion and equality (`≐`, a pair of inclusions) decided over the enumeration, a witness of a failed inclusion, and the order of each; the trivial subgroup has order 1 and the whole group its own order; conjugates and normalizers with their textbook deciders; `memo`, which remembers a decider as a table over the enumeration; and a decidable subgroup of a finite group is a finite group in its own right, enumerated by the indices its decider accepts, so that a theorem about finite groups applies to a subgroup (a Sylow subgroup of a subgroup, a p-subgroup as a p-group).
++  **Subgroups given by generators**, as GAP gives them (ADR 0001, § 2): ⟨A⟩ for a list A, with membership as a word in A and its inverses, and the universal property (a subgroup that holds A holds ⟨A⟩); its decider read from a Schreier vector, which a breadth-first search computes and three checks certify, discharged by evaluation for a concrete group; inclusion, the normalizer and the equality of conjugates decided by the generators alone; and the records `Generators` and `Adjoined`, which hold the certificates, since a certificate in a type at a call is evaluated again (under a bound variable symbolically, which exhausted the spike's 6 GB heap).  The decider for every finite group, by closing A in at most |G| steps, is M3-4's.  The spike's `Spike.Setoid` and `Spike.Generated` (commit 1996be2) are the first drafts.
 +  **The subgroups agda-algebras builds, decidable over a finite group**: the trivial and whole subgroups, intersections, the centralizer of a decidable subset, the normal closure of an element (`NormalClosureᵈ`), and the set HK of products of two decidable subgroups as a decidable subset; inclusion of one decidable subgroup in another, decided.
 +  **The notions later issues state**, each decidable over a finite group: normal subgroups; abelian groups; powers xⁿ, and elementary abelian p-groups (abelian groups in which xᵖ = 1 for every x, for a prime p); the subgroups between H and K (agda-algebras' `SubInterval`); complements (N ∩ K is trivial and NK is the whole group); and minimal normal subgroups in the witnessed form of agda-algebras' `MinimalNormalDescent`, with its descent theorem (every nontrivial normal subgroup of a finite group contains a minimal normal one) stated for the library's finite groups.
-+  **The two rules for the types of subgroups, applied**.  Every equality of subgroups is a pair of inclusions, and every premise about all subgroups between two, or all normal subgroups, carries a witness (a normal subgroup inside N that holds an element other than 1 contains N; a subgroup between H and K that holds an element outside H contains K) in place of a disjunction.  The modules say so where they define the notions, with the reason.
++  **The two rules for the types of subgroups, applied** (ADR 0001, § 3).  Every equality of subgroups is `≐`, a pair of inclusions, decided.  A premise about all decidable subgroups between two may end in a disjunction, which proves no excluded middle, since a subgroup built from a proposition is decidable only when the proposition is; the generator condition (each element of K outside H = ⟨B⟩ generates K together with B), which a search decides, proves the disjunction, and conversely.  A premise about all subgroups that are predicates (agda-algebras' `MinimalNormal`, `MinimalNormalDescent`) carries a witness instead (a normal subgroup inside N that holds an element other than 1 contains N; a subgroup between H and K that holds an element outside H contains K).  The modules say so where they define the notions, with the reason.
 
 **Dependencies**: M2-2.
 
@@ -588,12 +593,14 @@ On the representation of ADR 0001 and the counting of M2-2, the following:
 
 +  [ ] Finite groups, and the passage to agda-algebras' `Group`
 +  [ ] Decidable subgroups, their orders, and a subgroup as a finite group
++  [ ] Subgroups given by generators: words, Schreier vectors and their certificates, and the decisions by generators
 +  [ ] agda-algebras' subgroups and notions, decidable over a finite group, and the descent theorem
 
 ## Acceptance criteria
 
 +  [ ] The modules check under the flags with no postulate
 +  [ ] The orders of agda-algebras' Klein four-group and S₃, and of their trivial and whole subgroups, computed by evaluation
++  [ ] The orders of ⟨s⟩, ⟨t⟩, V and A₄ in agda-algebras' A₅, given by generators, computed by evaluation, with the time each takes
 
 ---
 
@@ -607,7 +614,7 @@ The concrete finite groups that the examples and Cayley's theorem need, as follo
 
 +  **Groups from tables**.  agda-algebras' `TableGroup` (a group on `Fin n` whose elements are given as permutations of `Fin d`, with associativity from the faithful action) gives a finite group of this library, and its Boolean subgroups give subgroups; agda-algebras' examples (`KleinFourGroup`, `CyclicGroup3`, `CyclicGroup6`, `SymmetricGroup3`, `AlternatingGroup5`) as finite groups, with their orders computed.
 +  **The cyclic group ℤ/n** on `Fin n`, with addition modulo n, for every n ≥ 1 (Cauchy's theorem acts with ℤ/p, M4-2).
-+  **The symmetric group Sym(n)** of the permutations of `Fin n`, as a finite group of order n!, with permutations stored so that their equality is decidable (as vectors of images, related to agda-stdlib's `Data.Fin.Permutation`); a group of permutations of `Fin n` as a subgroup of it.
++  **The symmetric group Sym(n)** of the permutations of `Fin n`, as a finite group of order n!, with permutations stored so that their equality is decidable (as vectors of images, related to agda-stdlib's `Data.Fin.Permutation`); a group of permutations of `Fin n` as a subgroup of it, given by generators (ADR 0001, § 2).
 +  **Cayley's theorem** (Gorenstein 1.2.16; Rotman 3.12; Isaacs, p. 2).  Every finite group G is isomorphic to a group of permutations of `Fin` of the order of G: the left regular action, through the bijection of G with `Fin` of its order (M2-2), is a one-to-one homomorphism into the symmetric group and an isomorphism onto its image.  agda-algebras' `RegularAction` (the regular action as a coset algebra) is used where it serves.
 
 The books are those of the plan's [sources].
@@ -673,7 +680,7 @@ The books are those of the plan's [sources].
 
 For a finite group G acting on a finite setoid X, the following:
 
-+  **Actions**.  The library's notion of an action of a finite group on a finite setoid, and how it relates to agda-algebras' `RightAction` (`Classical.Structures.Group.IndexAction`) and to its G-sets (`Classical.Structures.Group.GSet`); and the actions later issues use: left multiplication on G/H (agda-algebras' `CosetAction`), conjugation on G, and conjugation on subgroups (or on the conjugates of one subgroup, as ADR 0001 decides).
++  **Actions**.  The library's notion of an action of a finite group on a finite setoid, and how it relates to agda-algebras' `RightAction` (`Classical.Structures.Group.IndexAction`) and to its G-sets (`Classical.Structures.Group.GSet`); and the actions later issues use: left multiplication on G/H (agda-algebras' `CosetAction`), conjugation on G, and conjugation on the conjugates of one subgroup H, which ADR 0001 (§ 4) takes as the finite setoid of G's elements with g and h the same when gHg⁻¹ ≐ hHh⁻¹, that is, G/N_G(H), so that G acts on them by left multiplication on cosets.
 +  **Orbits, stabilizers and fixed points**.  The orbit of x, decidable by a search over G, so that the orbits partition X (M2-2); the stabilizer Gₓ, a decidable subgroup; the fixed points, a decidable subset; transitive actions, regular actions (transitive, with every stabilizer trivial), and the conjugate stabilizer of gx (the stabilizer of gx is gGₓg⁻¹, stated as inclusions).
 +  **The orbit-stabilizer theorem** (Isaacs 1.4; Aschbacher (5.11); Kurzweil and Stellmacher 3.1.5; Rotman 3.19): the orbit of x is in bijection with G/Gₓ, so |Gx| = |G : Gₓ|, which divides |G|.
 +  **The orbit equation**: |X| is the sum of the sizes of the orbits, that is, the sum of |G : Gₓ| over a set of representatives of the orbits.
@@ -738,11 +745,11 @@ The books are those of the plan's [sources].
 
 For a finite group G, the following:
 
-+  **Normalizers**.  The normalizer of a subgroup H, the g with gHg⁻¹ ⊆ H (an equality in a finite group, by orders), as a decidable subgroup, with the conjugates of agda-algebras' `Conjugate`; H is normal in its normalizer, and H is normal in G exactly when its normalizer contains G.
++  **Normalizers**.  The normalizer of a subgroup H, the g with gHg⁻¹ ⊆ H and g⁻¹Hg ⊆ H (in a finite group one inclusion gives the other, by orders), as a decidable subgroup with the conjugates of agda-algebras' `Conjugate`, by M2-3's textbook decider, and by the generators when H is given by them (ADR 0001, § 2: gag⁻¹ and g⁻¹ag in H for each generator a); H is normal in its normalizer, and H is normal in G exactly when its normalizer contains G.
 +  **The number of conjugates of a subgroup** is the index of its normalizer (Gorenstein 1.2.3(iii); Isaacs 1.6; Aschbacher (5.12); Rotman 3.21(ii)), from M3-2 with G acting by conjugation on the conjugates of H.
 +  **Centralizers and the center**.  The centralizer of an element and of a decidable subset (agda-algebras' `Centralizer`), decidable; the center Z(G), decidable and normal, and the set of fixed points of the conjugation action.
 +  **The number of conjugates of an element** x is the index of its centralizer (Gorenstein 1.2.3(i); Isaacs 1.5; Rotman 3.21(i)).
-+  **The subgroup generated by a decidable subset** S, ⟨S⟩: the least subgroup that holds S, with decidable membership (by closing S under products in finitely many steps), and leastness stated as "every subgroup that holds S holds ⟨S⟩".
++  **The subgroup generated by a decidable subset** S, ⟨S⟩: the least subgroup that holds S, as M2-3's generated subgroup of the list of S's elements (membership a word, leastness its universal property, stated as "every subgroup that holds S holds ⟨S⟩"), with decidable membership in every finite group, by closing S under products and inverses in at most |G| steps, which the pigeonhole principle bounds (M2-2).  This is the decider a theorem about every finite group needs; M2-3's certified Schreier vector decides the same predicate faster for a concrete group.
 +  **The order of an element** (Isaacs X.9; Kurzweil and Stellmacher 1.1.8; Rotman 2.12): the cyclic subgroup ⟨g⟩; the order of g, the least n ≥ 1 with gⁿ = 1, which exists by the pigeonhole principle and is found by search; it is the order of ⟨g⟩, so it divides the order of G, and g raised to the order of G is 1.
 
 The books are those of the plan's [sources].
@@ -953,7 +960,7 @@ The books are those of the plan's [sources].
 For a finite group G, a prime p and a Sylow p-subgroup P, the following:
 
 +  **Sylow's third theorem** (Gorenstein 1.2.9(iii); Isaacs 1.15 and 1.17; Aschbacher, Sylow's Theorem (3); Kurzweil and Stellmacher 3.2.3(b) and (c); Rotman 4.12(ii)): the number nₚ of Sylow p-subgroups is the index of the normalizer of P, so it divides |G : P| (the tower law, M3-1), and nₚ ≡ 1 (mod p).
-+  **The count**: nₚ is the size of the finite setoid of Sylow p-subgroups that ADR 0001 provides, or of the conjugates of P indexed by G, which the second theorem makes the same; state nₚ so that Agda computes it for a concrete group.
++  **The count**, in the two forms of ADR 0001 (§ 4), the textbook's first: the size of the finite setoid Syl_p(G) of the decidable subgroups of order pᵃ under `≐`, enumerated by the conjugates of P, which the second theorem shows to be all of them; and the number of distinct conjugates of P, the size of the finite setoid G/N_G(P).  State both so that Agda computes them for a concrete group, the second by the generators of P.
 +  **The proof**: P acts by conjugation on the Sylow p-subgroups.  A Sylow subgroup Q that P fixes is normalized by P, so PQ is a p-subgroup (the product formula, M3-3), hence P ⊆ Q, and P and Q contain each other by their orders.  So P is the only fixed point, and M4-1 gives nₚ ≡ 1 (mod p).
 
 The books are those of the plan's [sources].
@@ -986,7 +993,7 @@ Sylow's theorems on concrete groups, checked by evaluation, as follows:
 +  **A₅** (agda-algebras' `AlternatingGroup5`): n₂ = 5, n₃ = 10 and n₅ = 6.
 +  **The Klein four-group and ℤ/6**, whose Sylow subgroups are normal.
 
-Record the time each example takes to check.  Where an evaluation costs too much (A₅'s n₂, say), say so in the module and check what can be checked.
+Record the time each example takes to check, for both forms of nₚ where Agda can compute them (ADR 0001, § 4): the number of conjugates, decided by the generators (the spike of ADR 0001 computed A₅'s three in about 0.2 s each), and the size of Syl_p(G), by a search through generated subgroups (cyclic subgroups for a prime order: the spike counted |Syl₅(A₅)| = 6 and |Syl₃(A₅)| = 10 that way; the Klein four-groups of A₅ and Sym(4) need a second generator).  Where an evaluation costs too much, say so in the module and check what can be checked.
 
 **Dependencies**: M4-5, M2-4.
 
@@ -1135,7 +1142,7 @@ The books are those of the plan's [sources].
 The account of the library that the release carries, as follows:
 
 +  **The README**, after agda-lattices': what the library proves, each result with its sources by theorem number; how to check it; the modules; releases and how to build on one; the license and citation; and the acknowledgment of the AI assistance, worded as agda-lattices words it.
-+  **A statements module**, as agda-lattices' `Free.FJN` is for Freese, Ježek and Nation's book: each textbook result the library proves, as one definition whose type is its statement, named by its number in a main reference that William chooses (deferred on 2026-11-25), with a table from each statement to the module that proves it, and a check that every name in the table resolves.
++  **A statements module**, as agda-lattices' `Free.FJN` is for Freese, Ježek and Nation's book: each textbook result the library proves, as one definition whose type is its statement, named by its number in the main reference, Aschbacher's *Finite Group Theory*, 2nd ed. (William's decision of 2026-11-26; recorded in ADR 0001), or, for a result Aschbacher does not state, by its number in another book of the plan's sources, with a table from each statement to the module that proves it, and a check that every name in the table resolves.
 +  **`CHANGELOG.md`**, from `v0.1.0`, after agda-lattices'.
 
 **Dependencies**: M4-6, M5-1, M5-3, M5-4.
