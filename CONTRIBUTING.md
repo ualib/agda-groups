@@ -63,8 +63,8 @@ and then the lint's count of the plan's milestones, labels and issues,
 with 0 errors and 0 warnings:
 
     bash scripts/check-safety.sh src agda-groups.agda-lib
-    safety: 5 modules, each with the pragma and no postulate or unsafe pragma
-    wrote src/EverythingGroups.agda (5 modules)
+    safety: 15 modules, each with the pragma and no postulate or unsafe pragma
+    wrote src/EverythingGroups.agda (15 modules)
     agda +RTS -M6G -A128M -RTS  src/EverythingGroups.agda
     gh-project-lint docs/GITHUB_PROJECT.md
 
@@ -99,8 +99,23 @@ Algebra Library that yours imports.
 ### Name and place
 
 +  A module's name is `Groups.` followed by its path under `src/Groups/`:
-   `Groups.Subgroup.Generated` is `src/Groups/Subgroup/Generated.lagda.md`.
+   `Groups.Subgroups.Generated` is `src/Groups/Subgroups/Generated.lagda.md`.
    ADR 0001's § 8 names the first modules, nested by topic.
++  **A barrel for each directory**.  A directory `src/Groups/X/` has a
+   *barrel* `Groups.X` beside it, `src/Groups/X.lagda.md`, a module that
+   declares nothing of its own: its prose lists each module of the
+   directory in a bullet list, with a line or two on what the module
+   holds, and its code re-exports each with `open import ... public`.
+   The root module `Groups` is the barrel of `src/Groups/`.  So a module
+   with submodules holds nothing but re-exports, and the directory's
+   first module, which the others build on, is `Groups.X.Basic`
+   (`Groups.Subgroups.Basic`).  A module added to a directory is added
+   to its barrel's list and imports in the same pull request.
++  **No barrel imports an examples module**.  A directory's examples
+   module, `Groups.X.Examples`, is named in its barrel's prose and
+   imported by no barrel, so that a module that imports a barrel neither
+   checks the evaluations nor takes their names; the generated aggregator
+   imports it, so `make check` checks it.
 +  **A published name is kept**.  Once a module or a definition is in a
    release, its name does not change silently.  To rename one, keep the
    old name beside the new for at least one release, with a warning:
@@ -124,15 +139,15 @@ Algebra Library that yours imports.
 
        ---
        layout: default
-       file: "src/Groups/Subgroup/Generated.lagda.md"
-       title: "Groups.Subgroup.Generated module"
+       file: "src/Groups/Subgroups/Generated.lagda.md"
+       title: "Groups.Subgroups.Generated module"
        date: "2026-11-26"
        author: "the agda-groups development team"
        ---
 
        ### Subgroups given by generators
 
-       This is the `Groups.Subgroup.Generated` module of the agda-groups library.
+       This is the `Groups.Subgroups.Generated` module of the agda-groups library.
 
 +  **The pragma**.  Every module's code begins with
    `{-# OPTIONS --without-K --exact-split --safe #-}`, its one `OPTIONS`

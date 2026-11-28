@@ -378,19 +378,24 @@ Lagrange's theorem chooses its transversal, § 9.9).
    modulo p;
 +  M2-3 ([#7]): `Groups.Finite.Group` (`FiniteGroup`, its order, index
    map, decidable equality, `fromFiniteAlgebra`, `toFiniteAlgebra`);
-   `Groups.Subgroup` (agda-algebras' `DecSubgroup` as the library's
+   `Groups.Subgroups.Basic` (agda-algebras' `DecSubgroup` as the library's
    subgroups: membership, order, inclusion and equality decided, the
    witness of a failed inclusion, conjugates and normalizers with their
-   textbook deciders, and `memo`); `Groups.Subgroup.Generated` (words,
+   textbook deciders, and `memo`); `Groups.Subgroups.Generated` (words,
    the generated subgroup and its universal property, Schreier vectors
    and their certificates, `Generators` and `Adjoined`, and the
-   decisions by generators); `Groups.Subgroup.Group` (a subgroup as a
-   finite group); `Groups.Subgroup.Notions` (normal subgroups, abelian
+   decisions by generators); `Groups.Subgroups.Group` (a subgroup as a
+   finite group); `Groups.Subgroups.Notions` (normal subgroups, abelian
    groups, powers, elementary abelian p-groups, the subgroups between two
    with the generator condition, complements, minimal normal subgroups);
 +  M2-4 ([#8]): `Groups.Table` (groups on `Fin n`, re-tabulation, and
    agda-algebras' examples as finite groups); `Groups.Cyclic`,
    `Groups.Symmetric`, `Groups.Cayley`.
+
+Each directory `Groups/X/` has a barrel `Groups.X`, which lists the
+directory's modules and re-exports them, and `Groups` re-exports the
+barrels; an examples module is named in its barrel and imported by
+none (William, 2026-11-27).
 
 ## 8.  What the spike measured
 

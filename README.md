@@ -37,12 +37,32 @@ the textbooks that state it.
 ## Status
 
 The repository holds its plan, its toolchain, ADR 0001 (how a finite
-group and its subgroups are represented) and its first modules, the
-counting of finite setoids that later modules use: `Groups.Finite.Setoid`,
-`Groups.Finite.Subset` and `Groups.Finite.Sum`, with their evaluations in
-`Groups.Finite.Examples`.  The plan,
-[`docs/GITHUB_PROJECT.md`](docs/GITHUB_PROJECT.md), has six milestones, as
-follows:
+group and its subgroups are represented) and its first modules.  The
+module `Groups` re-exports them all, through a barrel module for each
+directory under `src/Groups/` (`Groups.Finite`, `Groups.Subgroups` and
+`Groups.Examples`), which lists its modules and re-exports them.  They
+are the following:
+
++  the counting of finite setoids that later modules use:
+   `Groups.Finite.Setoid`, `Groups.Finite.Subset` and `Groups.Finite.Sum`,
+   with their evaluations in `Groups.Finite.Examples`;
++  finite groups and their subgroups, the types every later issue states
+   its theorems over: `Groups.Finite.Group` (finite groups and their
+   orders), `Groups.Subgroups.Basic` (decidable subgroups, their orders,
+   and the subgroups built from them), `Groups.Subgroups.Generated`
+   (subgroups given by generators), `Groups.Subgroups.Group` (a subgroup
+   as a finite group) and `Groups.Subgroups.Notions` (normal subgroups,
+   abelian and elementary abelian groups, the subgroups between two,
+   complements and minimal normal subgroups), with V₄, S₃ and A₅ as
+   finite groups in `Groups.Examples.Small` and the evaluations in
+   `Groups.Subgroups.Examples`.
+
+No barrel imports an examples module, so a module that imports a barrel
+neither checks the evaluations nor takes their names; `make check` checks
+them.
+
+The plan, [`docs/GITHUB_PROJECT.md`](docs/GITHUB_PROJECT.md), has six
+milestones, as follows:
 
 1.  the repository and its toolchain;
 2.  finite groups and counting, beginning with ADR 0001, the decision on
