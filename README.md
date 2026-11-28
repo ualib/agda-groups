@@ -36,8 +36,11 @@ the textbooks that state it.
 
 ## Status
 
-The repository holds its plan, its toolchain and one module, `Groups`,
-which declares nothing yet.  The plan,
+The repository holds its plan, its toolchain, ADR 0001 (how a finite
+group and its subgroups are represented) and its first modules, the
+counting of finite setoids that later modules use: `Groups.Finite.Setoid`,
+`Groups.Finite.Subset` and `Groups.Finite.Sum`, with their evaluations in
+`Groups.Finite.Examples`.  The plan,
 [`docs/GITHUB_PROJECT.md`](docs/GITHUB_PROJECT.md), has six milestones, as
 follows:
 
