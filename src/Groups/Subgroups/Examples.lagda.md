@@ -1,18 +1,18 @@
 ---
 layout: default
-file: "src/Groups/Subgroup/Examples.lagda.md"
-title: "Groups.Subgroup.Examples module"
+file: "src/Groups/Subgroups/Examples.lagda.md"
+title: "Groups.Subgroups.Examples module"
 date: "2026-11-27"
 author: "the agda-groups development team"
 ---
 
 ### Finite groups and their subgroups, evaluated
 
-This is the `Groups.Subgroup.Examples` module of the agda-groups library.
+This is the `Groups.Subgroups.Examples` module of the agda-groups library.
 
 It evaluates the orders of finite groups and of their subgroups, and the
-decisions of `Groups.Subgroup`, `Groups.Subgroup.Generated`,
-`Groups.Subgroup.Group` and `Groups.Subgroup.Notions`, on the Klein
+decisions of `Groups.Subgroups.Basic`, `Groups.Subgroups.Generated`,
+`Groups.Subgroups.Group` and `Groups.Subgroups.Notions`, on the Klein
 four-group V₄, on S₃ and on A₅ (`Groups.Examples.Small`).  Each check is
 a named definition proved by `refl`, so that Agda computes both sides
 while it checks the module and `--profile=definitions` reports the time
@@ -24,7 +24,7 @@ the time of building it and the time of counting it are reported apart.
 ```agda
 {-# OPTIONS --without-K --exact-split --safe #-}
 
-module Groups.Subgroup.Examples where
+module Groups.Subgroups.Examples where
 
 -- Imports from the Agda Standard Library
 open import Data.Bool.Base                         using ( true ; false )
@@ -44,10 +44,10 @@ open import Examples.Classical.Groups.AlternatingGroup5
 open import Groups.Examples.Small                  using ( v4 ; s3 ; a5 ; a5-s ; a5-t ; a5-v₁ ; a5-v₂ )
 open import Groups.Finite.Group                    using ( FiniteGroup )
 open import Groups.Finite.Subset                   using ( module Counting )
-open import Groups.Subgroup                        using ( module Subgroups )
-open import Groups.Subgroup.Generated              using ( module Generated )
-open import Groups.Subgroup.Group                  using ( module AsGroup )
-open import Groups.Subgroup.Notions                using ( module Notions )
+open import Groups.Subgroups.Basic                 using ( module Subgroups )
+open import Groups.Subgroups.Generated             using ( module Generated )
+open import Groups.Subgroups.Group                 using ( module AsGroup )
+open import Groups.Subgroups.Notions               using ( module Notions )
 
 open FiniteGroup using ( order )
 ```

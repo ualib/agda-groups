@@ -1,14 +1,14 @@
 ---
 layout: default
-file: "src/Groups/Subgroup/Generated.lagda.md"
-title: "Groups.Subgroup.Generated module"
+file: "src/Groups/Subgroups/Generated.lagda.md"
+title: "Groups.Subgroups.Generated module"
 date: "2026-11-27"
 author: "the agda-groups development team"
 ---
 
 ### Subgroups given by generators
 
-This is the `Groups.Subgroup.Generated` module of the agda-groups library.
+This is the `Groups.Subgroups.Generated` module of the agda-groups library.
 
 A subgroup is given as GAP gives one, by generators (ADR 0001, § 2).  For
 a list A of elements of a finite group G, a *letter* is an element of A
@@ -53,7 +53,7 @@ concrete group.
 ```agda
 {-# OPTIONS --without-K --exact-split --safe #-}
 
-module Groups.Subgroup.Generated where
+module Groups.Subgroups.Generated where
 
 -- Imports from the Agda Standard Library
 open import Agda.Primitive                         using () renaming ( Set to Type )
@@ -87,7 +87,7 @@ open import Classical.Structures.Group.Subgroups   using ( IsSubgroup ; mkIsSubg
 
 -- Imports from this library
 open import Groups.Finite.Group                    using ( FiniteGroup )
-open import Groups.Subgroup                        using ( module Subgroups )
+open import Groups.Subgroups.Basic                 using ( module Subgroups )
 
 private variable α ρ : Level
 ```
@@ -340,8 +340,8 @@ word's value, and the decider reads its answer off the vector.
 ```
 
 Two facts about adjoining a generator, for the subgroups ⟨x, B⟩ of
-`Groups.Subgroup.Notions`: ⟨B⟩ lies in ⟨x, B⟩, and ⟨x, B⟩ depends on x
-only up to `≈`.
+`Groups.Subgroups.Notions`: ⟨B⟩ lies in ⟨x, B⟩, and ⟨x, B⟩ depends
+on x only up to `≈`.
 
 ```agda
   -- ⟨B⟩ lies in ⟨x, B⟩ ...
@@ -405,14 +405,14 @@ x ∷ B of each.  A function of a subgroup by generators takes the record.
 #### Decisions by the generators alone
 
 ⟨A⟩ ⊆ K exactly when every generator lies in K, as GAP tests the
-inclusion of one group in another (its `IsSubset` for groups).  With x
-^ g for the conjugate g x g⁻¹, as in `Groups.Subgroup`, g normalizes ⟨A⟩
-exactly when a ^ g and a ^ g⁻¹ lie in ⟨A⟩ for every
+inclusion of one group in another (its `IsSubset` for groups).  With
+x ^ g for the conjugate g x g⁻¹, as in `Groups.Subgroups.Basic`,
+g normalizes ⟨A⟩ exactly when a ^ g and a ^ g⁻¹ lie in ⟨A⟩ for every
 generator a, by the universal property applied to the preimages of ⟨A⟩
 under conjugation; the normalizer by generators is the textbook
-predicate of `Groups.Subgroup` with this faster decider.  And g ⟨A⟩ g⁻¹ ⊆
-K exactly when every a ^ g lies in K, which decides the equality of two
-conjugates by |A| questions each way.
+predicate of `Groups.Subgroups.Basic` with this faster decider.  And
+g ⟨A⟩ g⁻¹ ⊆ K exactly when every a ^ g lies in K, which decides the
+equality of two conjugates by |A| questions each way.
 
 ```agda
   -- ⟨A⟩ ⊆ K, decided by the generators.

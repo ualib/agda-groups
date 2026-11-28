@@ -1,14 +1,14 @@
 ---
 layout: default
-file: "src/Groups/Subgroup.lagda.md"
-title: "Groups.Subgroup module"
+file: "src/Groups/Subgroups/Basic.lagda.md"
+title: "Groups.Subgroups.Basic module"
 date: "2026-11-27"
 author: "the agda-groups development team"
 ---
 
 ### Subgroups of a finite group
 
-This is the `Groups.Subgroup` module of the agda-groups library.
+This is the `Groups.Subgroups.Basic` module of the agda-groups library.
 
 A **subgroup** of a finite group G is the Agda Universal Algebra
 Library's decidable subgroup, `DecSubgroup`: a predicate on the carrier,
@@ -42,7 +42,7 @@ conjugation by g and by g⁻¹ maps H into H.
 ```agda
 {-# OPTIONS --without-K --exact-split --safe #-}
 
-module Groups.Subgroup where
+module Groups.Subgroups.Basic where
 
 -- Imports from the Agda Standard Library
 open import Agda.Primitive                         using () renaming ( Set to Type )

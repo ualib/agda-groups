@@ -1,14 +1,14 @@
 ---
 layout: default
-file: "src/Groups/Subgroup/Group.lagda.md"
-title: "Groups.Subgroup.Group module"
+file: "src/Groups/Subgroups/Group.lagda.md"
+title: "Groups.Subgroups.Group module"
 date: "2026-11-27"
 author: "the agda-groups development team"
 ---
 
 ### A subgroup as a finite group
 
-This is the `Groups.Subgroup.Group` module of the agda-groups library.
+This is the `Groups.Subgroups.Group` module of the agda-groups library.
 
 A subgroup H of a finite group G is a finite group in its own right (ADR
 0001, § 6), so that a theorem about finite groups applies to a subgroup:
@@ -29,7 +29,7 @@ group, is a subgroup of G (its *image*) of the same order.
 ```agda
 {-# OPTIONS --without-K --exact-split --safe #-}
 
-module Groups.Subgroup.Group where
+module Groups.Subgroups.Group where
 
 -- Imports from the Agda Standard Library
 open import Data.Product.Base                      using ( Σ-syntax ; _,_ ; proj₁ ; proj₂ )
@@ -47,7 +47,7 @@ open import Classical.Structures.Group.Subgroups   using ( IsSubgroup ; mkIsSubg
 open import Groups.Finite.Group                    using ( FiniteGroup )
 open import Groups.Finite.Setoid                   using ( toIrredundant ; inverse⇒≡ )
 open import Groups.Finite.Subset                   using ( subsetoid ; module Counting )
-open import Groups.Subgroup                        using ( module Subgroups )
+open import Groups.Subgroups.Basic                 using ( module Subgroups )
 
 private variable α ρ : Level
 ```

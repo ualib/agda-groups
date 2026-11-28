@@ -1,14 +1,14 @@
 ---
 layout: default
-file: "src/Groups/Subgroup/Notions.lagda.md"
-title: "Groups.Subgroup.Notions module"
+file: "src/Groups/Subgroups/Notions.lagda.md"
+title: "Groups.Subgroups.Notions module"
 date: "2026-11-27"
 author: "the agda-groups development team"
 ---
 
 ### Notions about subgroups
 
-This is the `Groups.Subgroup.Notions` module of the agda-groups library.
+This is the `Groups.Subgroups.Notions` module of the agda-groups library.
 
 It states the notions that later modules use, each decided over a finite
 group: normal subgroups; abelian groups and subgroups; powers xⁿ and
@@ -48,7 +48,7 @@ library's finite groups and decidable subgroups.
 ```agda
 {-# OPTIONS --without-K --exact-split --safe #-}
 
-module Groups.Subgroup.Notions where
+module Groups.Subgroups.Notions where
 
 -- Imports from the Agda Standard Library
 open import Agda.Primitive                         using () renaming ( Set to Type )
@@ -85,8 +85,8 @@ open import Classical.Structures.Group.Subgroups   using ( IsSubgroup ; DecSubgr
 -- Imports from this library
 open import Groups.Finite.Group                    using ( FiniteGroup )
 open import Groups.Finite.Subset                   using ( DecSubset )
-open import Groups.Subgroup                        using ( module Subgroups )
-open import Groups.Subgroup.Generated              using ( module Generated )
+open import Groups.Subgroups.Basic                 using ( module Subgroups )
+open import Groups.Subgroups.Generated             using ( module Generated )
 
 private variable α ρ : Level
 ```
@@ -367,8 +367,9 @@ N ∩ K = 1 is stated as an inclusion in the trivial subgroup, the other
 inclusion being automatic, and NK = G as the Agda Universal Algebra
 Library's `Factors`, every element a product.  Both are decided: the
 first by an inclusion, the second by the decider of the set NK of
-products (`Groups.Subgroup`).  That library's `Complements` module treats
-complements in an interval of subgroups, which is not this notion.
+products (`Groups.Subgroups.Basic`).  That library's `Complements`
+module treats complements in an interval of subgroups, which is not
+this notion.
 
 ```agda
   -- K is a complement to N.
