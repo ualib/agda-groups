@@ -43,38 +43,45 @@ with the round trips that remember a decision procedure as its table (ADR
 
 module Groups.Finite.Subset where
 
--- Imports from the Agda Standard Library
-open import Agda.Primitive                         using () renaming ( Set to Type )
-open import Data.Bool.Base                         using ( true ; false ; not ; T )
-open import Data.Empty                             using ( ⊥-elim )
-open import Data.Fin.Base                          using ( Fin ; zero ; suc )
-open import Data.Fin.Subset                        using ( Subset )
-open import Data.Nat.Base                          using ( ℕ ; zero ; suc ; _≤_ ; _<_ ; _∸_ ; _+_ )
-open import Data.Nat.Properties                    using ( ≤-reflexive ; <⇒≱ ; m+[n∸m]≡n )
-open import Data.Product.Base                      using ( _,_ ; proj₁ ; _×_ ; Σ ; ∃-syntax )
-open import Data.Unit.Base                         using ( tt )
-open import Data.Vec.Base                          using ( _∷_ ; tabulate ; lookup )
-open import Data.Vec.Properties                    using ( lookup∘tabulate ; tabulate∘lookup
-                                                         ; tabulate-cong ; tabulate-∘
-                                                         ; []=⇒lookup ; lookup⇒[]= )
-open import Level                                  using ( Level ; _⊔_ ; 0ℓ )
+open import Agda.Primitive using () renaming ( Set to Type )
+
+-- Imports from agda-stdlib ----------------------------------------------------
+open import Data.Bool.Base                         using  ( true ; false ; not ; T )
+open import Data.Empty                             using  ( ⊥-elim )
+open import Data.Fin.Base                          using  ( Fin ; zero ; suc )
+open import Data.Fin.Subset                        using  ( Subset )
+open import Data.Nat.Base                          using  ( ℕ ; zero ; suc ; _≤_
+                                                          ; _<_ ; _∸_ ; _+_ )
+open import Data.Nat.Properties                    using  ( ≤-reflexive ; <⇒≱
+                                                          ; m+[n∸m]≡n )
+open import Data.Product.Base                      using  ( _,_ ; proj₁ ; _×_
+                                                          ; Σ ; ∃-syntax )
+open import Data.Unit.Base                         using  ( tt )
+open import Data.Vec.Base                          using  ( _∷_ ; tabulate ; lookup )
+open import Data.Vec.Properties                    using  ( lookup∘tabulate
+                                                          ; tabulate∘lookup
+                                                          ; tabulate-cong ; tabulate-∘
+                                                          ; []=⇒lookup ; lookup⇒[]= )
+open import Level                                  using  ( Level ; _⊔_ ; 0ℓ )
                                                    renaming ( suc to lsuc )
-open import Relation.Binary.Bundles                using ( Setoid )
-open import Relation.Binary.Definitions            using ( _Respects_ )
-open import Relation.Binary.PropositionalEquality  using ( _≡_ ; refl ; sym ; trans ; cong ; subst )
-open import Relation.Nullary.Decidable             using ( Dec ; yes ; no ; does ; map′ ; _×?_
-                                                         ; _→?_ ; ¬? ; T? ; decidable-stable )
-open import Relation.Unary                         using ( Pred ; Decidable ; _∈_ ; _∉_ ; _⊆_
-                                                         ; _⊈_ ; _⊂_ ; _≐_ ; U ; ∅ )
+open import Relation.Binary.Bundles                using  ( Setoid )
+open import Relation.Binary.Definitions            using  ( _Respects_ )
+open import Relation.Binary.PropositionalEquality  using  ( _≡_ ; refl ; sym
+                                                          ; trans ; cong ; subst )
+open import Relation.Nullary.Decidable             using  ( Dec ; yes ; no ; does
+                                                          ; map′ ; _×?_ ; _→?_ ; ¬?
+                                                          ; T? ; decidable-stable )
+open import Relation.Unary                         using  ( Pred ; Decidable ; _∈_
+                                                          ; _∉_ ; _⊆_ ; _⊈_ ; _⊂_
+                                                          ; _≐_ ; U ; ∅ )
+import Data.Fin.Properties           as Fin
+import Data.Fin.Subset               as Sub
+import Data.Fin.Subset.Properties    as SubP
+import Relation.Binary.Construct.On  as On
+import Relation.Unary                as U
 
-import Data.Fin.Properties                         as Fin
-import Data.Fin.Subset                             as Sub
-import Data.Fin.Subset.Properties                  as SubP
-import Relation.Binary.Construct.On                as On
-import Relation.Unary                              as U
-
--- Imports from this library
-open import Groups.Finite.Setoid                   using ( FiniteSetoid )
+-- Imports from agda-groups  ----------------------------------------------------
+open import Groups.Finite.Setoid using ( FiniteSetoid )
 
 private variable a ℓ p q : Level
 ```
@@ -181,7 +188,8 @@ private
   ⇒does (no ¬a) a  = ¬a a
 
   -- Decisions of equivalent propositions agree.
-  does-cong : ∀ {A : Type p} {B : Type q} → (A → B) → (B → A) → (d : Dec A) (e : Dec B) → does d ≡ does e
+  does-cong : ∀ {A : Type p} {B : Type q}
+    → (A → B) → (B → A) → (d : Dec A) (e : Dec B) → does d ≡ does e
   does-cong f g (yes a) (yes b)  = refl
   does-cong f g (yes a) (no ¬b)  = ⊥-elim (¬b (f a))
   does-cong f g (no ¬a) (yes b)  = ⊥-elim (¬a (g b))
@@ -205,9 +213,10 @@ tables and sizes of the decidable subsets of the finite setoid `F`.
 
 ```agda
 module Counting {S : Setoid a ℓ} (F : FiniteSetoid S) where
-  open Setoid S using ( Carrier ; _≈_ ; reflexive ) renaming ( sym to ≈sym ; trans to ≈trans )
-  open FiniteSetoid F using ( size ; enum ; enum-inj ; idx ; enum-idx ; idx-cong ; idx-enum
-                            ; all? ; any? )
+  open Setoid S        using ( Carrier ; _≈_ ; reflexive )
+                       renaming ( sym to ≈sym ; trans to ≈trans )
+  open FiniteSetoid F  using  ( size ; enum ; enum-inj ; idx ; enum-idx
+                              ; idx-cong ; idx-enum ; all? ; any? )
 
   -- The table of P: its decisions at the enumerated elements.
   table : DecSubset S p → Subset size
@@ -222,18 +231,22 @@ The table holds the position i exactly when P holds the i-th element.
 
 ```agda
   -- The i-th entry of the table.
-  lookup-table : (P : DecSubset S p) (i : Fin size) → lookup (table P) i ≡ does (decide P (enum i))
+  lookup-table : (P : DecSubset S p) (i : Fin size)
+    → lookup (table P) i ≡ does (decide P (enum i))
   lookup-table P i = lookup∘tabulate _ i
 
   -- An entry that holds is a member ...
-  T-table⇒∈ : (P : DecSubset S p) {i : Fin size} → T (lookup (table P) i) → enum i ∈ set P
+  T-table⇒∈ : (P : DecSubset S p) {i : Fin size}
+    → T (lookup (table P) i) → enum i ∈ set P
   T-table⇒∈ P {i} t = does⇒ (decide P (enum i)) (subst T (lookup-table P i) t)
 
   -- ... and a member's entry holds.
-  ∈⇒T-table : (P : DecSubset S p) {i : Fin size} → enum i ∈ set P → T (lookup (table P) i)
+  ∈⇒T-table : (P : DecSubset S p) {i : Fin size}
+    → enum i ∈ set P → T (lookup (table P) i)
   ∈⇒T-table P {i} pi = subst T (sym (lookup-table P i)) (⇒does (decide P (enum i)) pi)
 
-  -- The same, for agda-stdlib's membership in a Subset: an index in the table is a member's ...
+  -- The same, for agda-stdlib's membership in a Subset:
+  -- an index in the table is a member's ...
   ∈table⇒∈ : (P : DecSubset S p) {i : Fin size} → i Sub.∈ table P → enum i ∈ set P
   ∈table⇒∈ P {i} m = T-table⇒∈ P (subst T (sym ([]=⇒lookup m)) tt)
 
@@ -254,7 +267,9 @@ failed inclusion has a witness, found by a search of the enumeration.
   -- Inclusion is decidable.
   infix 4 _⊆?_ _≐?_
   _⊆?_ : (P : DecSubset S p) (Q : DecSubset S q) → Dec (set P ⊆ set Q)
-  P ⊆? Q = map′ (λ h {x} → h x) (λ h x → h {x}) (all? resp (λ x → decide P x →? decide Q x))
+  P ⊆? Q = map′  (λ h {x} → h x)
+                 (λ h x → h {x})
+                 (all? resp (λ x → decide P x →? decide Q x))
     where
     resp : (λ x → x ∈ set P → x ∈ set Q) Respects _≈_
     resp x≈y h py = respects Q x≈y (h (respects P (≈sym x≈y) py))
@@ -264,14 +279,18 @@ failed inclusion has a witness, found by a search of the enumeration.
   P ≐? Q = (P ⊆? Q) ×? (Q ⊆? P)
 
   -- A failed inclusion has a witness.
-  ⊈⇒∃ : (P : DecSubset S p) (Q : DecSubset S q) → set P ⊈ set Q → ∃[ x ] (x ∈ set P × x ∉ set Q)
+  ⊈⇒∃ : (P : DecSubset S p) (Q : DecSubset S q)
+    → set P ⊈ set Q → ∃[ x ] (x ∈ set P × x ∉ set Q)
   ⊈⇒∃ P Q P⊈Q = search (any? resp (λ x → decide P x ×? ¬? (decide Q x)))
     where
     resp : (λ x → x ∈ set P × x ∉ set Q) Respects _≈_
     resp x≈y (px , ¬qx) = respects P x≈y px , λ qy → ¬qx (respects Q (≈sym x≈y) qy)
+
     search : Dec (∃[ x ] (x ∈ set P × x ∉ set Q)) → ∃[ x ] (x ∈ set P × x ∉ set Q)
-    search (yes w)     = w
-    search (no  none)  = ⊥-elim (P⊈Q λ {x} px → decidable-stable (decide Q x) (λ ¬qx → none (x , px , ¬qx)))
+    search (yes w) = w
+    search (no  none) =
+      ⊥-elim (P⊈Q λ {x} px → decidable-stable  (decide Q x)
+                                               (λ ¬qx → none (x , px , ¬qx)))
 ```
 
 The sizes, from agda-stdlib's lemmas on `Subset n`: no subset is larger
@@ -280,18 +299,6 @@ subset of a subset is no larger, and smaller when the second holds an
 element outside the first; and the complement has the remaining size.
 
 ```agda
-  -- Equal subsets have equal tables ...
-  table-cong : (P : DecSubset S p) (Q : DecSubset S q) → set P ≐ set Q → table P ≡ table Q
-  table-cong P Q (P⊆Q , Q⊆P) = tabulate-cong (λ i → does-cong P⊆Q Q⊆P (decide P (enum i)) (decide Q (enum i)))
-
-  -- ... so equal sizes.
-  P≐Q⇒∣P∣≡∣Q∣ : (P : DecSubset S p) (Q : DecSubset S q) → set P ≐ set Q → ∣ P ∣ ≡ ∣ Q ∣
-  P≐Q⇒∣P∣≡∣Q∣ P Q eq = cong Sub.∣_∣ (table-cong P Q eq)
-
-  -- No subset is larger than the setoid.
-  ∣P∣≤n : (P : DecSubset S p) → ∣ P ∣ ≤ size
-  ∣P∣≤n P = SubP.∣p∣≤n (table P)
-
   -- The whole setoid has its size ...
   ∣full∣≡n : ∣ full ∣ ≡ size
   ∣full∣≡n = ∣tabulate-true∣ size
@@ -300,38 +307,57 @@ element outside the first; and the complement has the remaining size.
   ∣empty∣≡0 : ∣ empty ∣ ≡ 0
   ∣empty∣≡0 = ∣tabulate-false∣ size
 
-  -- An inclusion of subsets is an inclusion of their tables.
-  table-mono : (P : DecSubset S p) (Q : DecSubset S q) → set P ⊆ set Q → table P Sub.⊆ table Q
-  table-mono P Q P⊆Q m = ∈⇒∈table Q (P⊆Q (∈table⇒∈ P m))
+  module _ (P : DecSubset S p) where
+    -- The table of the complement is the complement of the table ...
+    table-∁ : table (∁ P) ≡ Sub.∁ (table P)
+    table-∁ = tabulate-∘ not (λ i → does (decide P (enum i)))
 
-  -- A subset of a subset is no larger.
-  P⊆Q⇒∣P∣≤∣Q∣ : (P : DecSubset S p) (Q : DecSubset S q) → set P ⊆ set Q → ∣ P ∣ ≤ ∣ Q ∣
-  P⊆Q⇒∣P∣≤∣Q∣ P Q P⊆Q = SubP.p⊆q⇒∣p∣≤∣q∣ (table-mono P Q P⊆Q)
+    -- ... so the complement has the remaining size.
+    ∣∁P∣≡n∸∣P∣ : ∣ ∁ P ∣ ≡ size ∸ ∣ P ∣
+    ∣∁P∣≡n∸∣P∣ = trans (cong Sub.∣_∣ table-∁) (SubP.∣∁p∣≡n∸∣p∣ (table P))
 
-  -- A subset of a subset that holds an element outside it is smaller.
-  P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ : (P : DecSubset S p) (Q : DecSubset S q) → set P ⊆ set Q
-    → ∀ {x} → x ∈ set Q → x ∉ set P → ∣ P ∣ < ∣ Q ∣
-  P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ P Q P⊆Q {x} qx ¬px = SubP.p⊂q⇒∣p∣<∣q∣
-    ( table-mono P Q P⊆Q , idx x
-    , ∈⇒∈table Q (respects Q (≈sym (enum-idx x)) qx)
-    , λ m → ¬px (respects P (enum-idx x) (∈table⇒∈ P m)) )
+    -- No subset is larger than the setoid.
+    ∣P∣≤n : ∣ P ∣ ≤ size
+    ∣P∣≤n = SubP.∣p∣≤n (table P)
 
-  -- A proper subset is smaller.
-  P⊂Q⇒∣P∣<∣Q∣ : (P : DecSubset S p) (Q : DecSubset S q) → set P ⊂ set Q → ∣ P ∣ < ∣ Q ∣
-  P⊂Q⇒∣P∣<∣Q∣ P Q (P⊆Q , Q⊈P) with ⊈⇒∃ Q P Q⊈P
-  ... | x , qx , ¬px = P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ P Q P⊆Q qx ¬px
 
-  -- The table of the complement is the complement of the table ...
-  table-∁ : (P : DecSubset S p) → table (∁ P) ≡ Sub.∁ (table P)
-  table-∁ P = tabulate-∘ not (λ i → does (decide P (enum i)))
+    -- A subset and its complement together have the size of the setoid.
+    ∣P∣+∣∁P∣≡n : ∣ P ∣ + ∣ ∁ P ∣ ≡ size
+    ∣P∣+∣∁P∣≡n = trans (cong (∣ P ∣ +_) ∣∁P∣≡n∸∣P∣) (m+[n∸m]≡n ∣P∣≤n)
 
-  -- ... so the complement has the remaining size.
-  ∣∁P∣≡n∸∣P∣ : (P : DecSubset S p) → ∣ ∁ P ∣ ≡ size ∸ ∣ P ∣
-  ∣∁P∣≡n∸∣P∣ P = trans (cong Sub.∣_∣ (table-∁ P)) (SubP.∣∁p∣≡n∸∣p∣ (table P))
+    module _ (Q : DecSubset S q) where
 
-  -- A subset and its complement together have the size of the setoid.
-  ∣P∣+∣∁P∣≡n : (P : DecSubset S p) → ∣ P ∣ + ∣ ∁ P ∣ ≡ size
-  ∣P∣+∣∁P∣≡n P = trans (cong (∣ P ∣ +_) (∣∁P∣≡n∸∣P∣ P)) (m+[n∸m]≡n (∣P∣≤n P))
+      -- Equal subsets have equal tables ...
+      table-cong : set P ≐ set Q → table P ≡ table Q
+      table-cong (P⊆Q , Q⊆P) =
+        tabulate-cong (λ i → does-cong  P⊆Q Q⊆P
+                                        (decide P (enum i))
+                                        (decide Q (enum i)))
+
+      -- ... so equal sizes.
+      P≐Q⇒∣P∣≡∣Q∣ : set P ≐ set Q → ∣ P ∣ ≡ ∣ Q ∣
+      P≐Q⇒∣P∣≡∣Q∣ eq = cong Sub.∣_∣ (table-cong eq)
+
+      -- An inclusion of subsets is an inclusion of their tables.
+      table-mono : set P ⊆ set Q → table P Sub.⊆ table Q
+      table-mono P⊆Q m = ∈⇒∈table Q (P⊆Q (∈table⇒∈ P m))
+
+      -- A subset of a subset is no larger.
+      P⊆Q⇒∣P∣≤∣Q∣ : set P ⊆ set Q → ∣ P ∣ ≤ ∣ Q ∣
+      P⊆Q⇒∣P∣≤∣Q∣ P⊆Q = SubP.p⊆q⇒∣p∣≤∣q∣ (table-mono P⊆Q)
+
+      -- A subset of a subset that holds an element outside it is smaller.
+      P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ : set P ⊆ set Q
+        → ∀ {x} → x ∈ set Q → x ∉ set P → ∣ P ∣ < ∣ Q ∣
+      P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ P⊆Q {x} qx ¬px = SubP.p⊂q⇒∣p∣<∣q∣
+        ( table-mono P⊆Q , idx x
+        , ∈⇒∈table Q (respects Q (≈sym (enum-idx x)) qx)
+        , λ m → ¬px (respects P (enum-idx x) (∈table⇒∈ P m)) )
+
+      -- A proper subset is smaller.
+      P⊂Q⇒∣P∣<∣Q∣ : set P ⊂ set Q → ∣ P ∣ < ∣ Q ∣
+      P⊂Q⇒∣P∣<∣Q∣ (P⊆Q , Q⊈P) with ⊈⇒∃ Q P Q⊈P
+      ... | x , qx , ¬px = P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ P⊆Q qx ¬px
 ```
 
 A subset of a subset with the same size contains it, so the two are
@@ -340,29 +366,34 @@ inequality above, and it is where the respect of `≈` is needed, through
 the witness of the failed inclusion.
 
 ```agda
-  -- A subset Q of which P is a subset, and no larger than P, lies in P.
-  P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P : (P : DecSubset S p) (Q : DecSubset S q) → set P ⊆ set Q → ∣ Q ∣ ≤ ∣ P ∣ → set Q ⊆ set P
-  P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P P Q P⊆Q ∣Q∣≤∣P∣ {x} qx =
-    decidable-stable (decide P x) λ ¬px → <⇒≱ (P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ P Q P⊆Q qx ¬px) ∣Q∣≤∣P∣
+      -- A subset Q of which P is a subset, and no larger than P, lies in P.
+      P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P : set P ⊆ set Q → ∣ Q ∣ ≤ ∣ P ∣ → set Q ⊆ set P
+      P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P P⊆Q ∣Q∣≤∣P∣ {x} qx =
+        decidable-stable (decide P x) λ ¬px → <⇒≱  (P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ P⊆Q qx ¬px)
+                                                   ∣Q∣≤∣P∣
 
-  -- A subset of a subset with the same size is equal to it.
-  P⊆Q∧∣P∣≡∣Q∣⇒P≐Q : (P : DecSubset S p) (Q : DecSubset S q) → set P ⊆ set Q → ∣ P ∣ ≡ ∣ Q ∣ → set P ≐ set Q
-  P⊆Q∧∣P∣≡∣Q∣⇒P≐Q P Q P⊆Q eq = P⊆Q , P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P P Q P⊆Q (≤-reflexive (sym eq))
+      -- A subset of a subset with the same size is equal to it.
+      P⊆Q∧∣P∣≡∣Q∣⇒P≐Q : set P ⊆ set Q → ∣ P ∣ ≡ ∣ Q ∣ → set P ≐ set Q
+      P⊆Q∧∣P∣≡∣Q∣⇒P≐Q P⊆Q eq = P⊆Q , P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P P⊆Q (≤-reflexive (sym eq))
 
   -- A subset with the size of the setoid holds every element.
   ∣P∣≡n⇒∈P : (P : DecSubset S p) → ∣ P ∣ ≡ size → ∀ x → x ∈ set P
-  ∣P∣≡n⇒∈P P eq x = P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P P full (λ _ → tt) (≤-reflexive (trans ∣full∣≡n (sym eq))) {x} tt
+  ∣P∣≡n⇒∈P P eq x =
+    P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P P full (λ _ → tt) (≤-reflexive (trans ∣full∣≡n (sym eq))) tt
 
   -- A subset with a member has positive size ...
   ∈⇒0<∣P∣ : (P : DecSubset S p) → ∀ {x} → x ∈ set P → 0 < ∣ P ∣
-  ∈⇒0<∣P∣ P {x} px = subst (_< ∣ P ∣) ∣empty∣≡0 (P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ empty P (λ ()) px (λ ()))
+  ∈⇒0<∣P∣ P px =
+    subst (_< ∣ P ∣) ∣empty∣≡0 (P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ empty P (λ ()) px (λ ()))
 
   -- ... and a subset of positive size has a member.
   0<∣P∣⇒∃ : (P : DecSubset S p) → 0 < ∣ P ∣ → ∃[ x ] x ∈ set P
   0<∣P∣⇒∃ P 0<∣P∣ with any? (respects P) (decide P)
-  ... | yes w     = w
-  ... | no  none  = ⊥-elim (<⇒≱ 0<∣P∣ (subst (∣ P ∣ ≤_) ∣empty∣≡0
-                      (P⊆Q⇒∣P∣≤∣Q∣ P empty λ {x} px → none (x , px))))
+  ... | yes w = w
+  ... | no  none =
+    ⊥-elim (<⇒≱ 0<∣P∣ (subst  (∣ P ∣ ≤_)
+                              ∣empty∣≡0
+                              (P⊆Q⇒∣P∣≤∣Q∣ P empty λ {x} px → none (x , px))))
 ```
 
 #### A table as a decidable subset
@@ -383,12 +414,13 @@ as inclusions; so a decision procedure is remembered as its table.
 
   -- The table of fromTable t is t ...
   table-fromTable : (t : Subset size) → table (fromTable t) ≡ t
-  table-fromTable t = trans (tabulate-cong (λ i → cong (lookup t) (idx-enum i))) (tabulate∘lookup t)
+  table-fromTable t =
+    trans (tabulate-cong (λ i → cong (lookup t) (idx-enum i))) (tabulate∘lookup t)
 
   -- ... and the subset of the table of P is P.
   fromTable-table : (P : DecSubset S p) → set (fromTable (table P)) ≐ set P
-  fromTable-table P =  (λ {x} t → respects P (enum-idx x) (T-table⇒∈ P t))
-                    ,  (λ {x} px → ∈⇒T-table P (respects P (≈sym (enum-idx x)) px))
+  fromTable-table P =  (λ {x} t → respects P (enum-idx x) (T-table⇒∈ P t)) ,
+                       (λ {x} px → ∈⇒T-table P (respects P (≈sym (enum-idx x)) px))
 ```
 
 #### A decidable subset as a finite setoid
@@ -410,7 +442,9 @@ setoids applies to a decidable subset, and a subgroup's order is its size.
     where
     t = table P
     sur : ∀ (u : Σ Carrier (set P)) → ∃[ k ] enum (pos t k) ≈ proj₁ u
-    sur (x , px) = rank t (idx x) m , ≈trans (reflexive (cong enum (pos-rank t (idx x) m))) (enum-idx x)
+    sur (x , px) =
+      rank t (idx x) m ,
+      ≈trans (reflexive (cong enum (pos-rank t (idx x) m))) (enum-idx x)
       where
       m : T (lookup t (idx x))
       m = ∈⇒T-table P (respects P (≈sym (enum-idx x)) px)

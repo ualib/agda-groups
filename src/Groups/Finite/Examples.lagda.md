@@ -27,63 +27,72 @@ members 0, 1 and 2.  Each evaluation is a named definition, so that
 
 module Groups.Finite.Examples where
 
--- Imports from the Agda Standard Library
-open import Data.Bool.Base                         using ( Bool ; true ; false ; T )
-open import Data.Empty                             using ( ⊥-elim )
-open import Data.Fin.Base                          using ( Fin ; toℕ ; _↑ˡ_ )
-open import Data.Fin.Patterns                      using ( 0F ; 1F ; 2F ; 3F ; 4F ; 5F )
-open import Data.Nat.Base                          using ( ℕ ; _%_ ; _<_ ; _≤_ ; _+_ ; _*_ ; _^_ ; _∸_ )
-open import Data.Nat.Divisibility                  using ( _∣_ ; divides )
-open import Data.Nat.Properties                    using ( n<1+n ; _<?_ ; ≤-refl ) renaming ( _≟_ to _≟ℕ_ )
-import Data.Nat.Properties
-open import Data.Product.Base                      using ( _,_ ; proj₁ ; proj₂ ; _×_ )
-open import Data.Sum.Base                          using ( inj₂ )
-open import Data.Unit.Base                         using ( ⊤ ; tt )
-open import Data.Vec.Base                          using ( [] ; _∷_ ; lookup )
-open import Function.Base                          using ( _∘_ )
-open import Data.Vec.Functional                    using () renaming ( [] to []ᶠ ; _∷_ to _∷ᶠ_ )
-open import Function.Bundles                       using ( Equivalence ; Inverse )
-open import Function.Properties.Inverse            using ( Inverse⇒Bijection )
-open import Level                                  using ( 0ℓ )
-open import Relation.Binary.Bundles                using ( Setoid ; DecSetoid )
-open import Relation.Binary.Definitions            using ( Decidable ; _Respects_ )
-open import Relation.Binary.PropositionalEquality  using ( _≡_ ; refl ; sym ; trans ; cong )
-open import Relation.Nullary.Decidable             using ( Dec ; does ; _→?_ ; ¬? ; toWitness ; toWitnessFalse )
-open import Relation.Nullary.Negation              using ( ¬_ )
-open import Relation.Unary                         using ( _∈_ ; _⊆_ ; _⊈_ ; _≐_ )
+-- Imports from agda-stdlib ----------------------------------------------------
+open import Data.Bool.Base                         using  ( Bool ; true ; false ; T )
+open import Data.Empty                             using  ( ⊥-elim )
+open import Data.Fin.Base                          using  ( Fin ; toℕ ; _↑ˡ_ )
+open import Data.Fin.Patterns                      using  ( 0F ; 1F ; 2F ; 3F ; 4F ; 5F )
+open import Data.Nat.Base                          using  ( ℕ ; _%_ ; _<_ ; _≤_
+                                                          ; _+_ ; _*_ ; _^_ ; _∸_ )
+open import Data.Nat.Divisibility                  using  ( _∣_ ; divides )
+open import Data.Nat.Properties                    using  ( n<1+n ; _<?_ ; ≤-refl )
+                                                   renaming ( _≟_ to _≟ℕ_ )
+open import Data.Product.Base                      using  ( _,_ ; proj₁ ; proj₂ ; _×_ )
+open import Data.Sum.Base                          using  ( inj₂ )
+open import Data.Unit.Base                         using  ( ⊤ ; tt )
+open import Data.Vec.Base                          using  ( [] ; _∷_ ; lookup )
+open import Function.Base                          using  ( _∘_ ; id )
+open import Data.Vec.Functional                    using  ()
+                                                   renaming ( [] to []ᶠ ; _∷_ to _∷ᶠ_ )
+open import Function.Bundles                       using  ( Equivalence ; Inverse )
+open import Function.Properties.Inverse            using  ( Inverse⇒Bijection )
+open import Level                                  using  ( 0ℓ )
+open import Relation.Binary.Bundles                using  ( Setoid ; DecSetoid )
+open import Relation.Binary.Definitions            using  ( Decidable ; _Respects_ )
+open import Relation.Binary.PropositionalEquality  using  ( _≡_ ; refl ; sym
+                                                          ; trans ; cong )
+open import Relation.Nullary.Decidable             using  ( Dec ; does ; _→?_ ; ¬?
+                                                          ; toWitness ; toWitnessFalse )
+open import Relation.Nullary.Negation              using  ( ¬_ )
+open import Relation.Unary                         using  ( _∈_ ; _⊆_ ; _⊈_ ; _≐_ )
 
 import Data.Bool.Properties                        as Bool
 import Data.Fin.Properties                         as Fin
 import Data.Fin.Subset                             as Sub
+import Data.Nat.Properties
 import Data.Vec.Base                               as Vec
 import Relation.Binary.PropositionalEquality       as ≡
 
-open import Algebra.Properties.CommutativeMonoid.Sum Data.Nat.Properties.+-0-commutativeMonoid
-                                                   using ( sum ; sum-syntax )
+open import Algebra.Properties.CommutativeMonoid.Sum
+  Data.Nat.Properties.+-0-commutativeMonoid        using  ( sum ; sum-syntax )
 
--- Imports from the Agda Universal Algebra Library
-open import Classical.Signatures.Group             using ( Sig-Group )
-open import Setoid.Algebras.Basic                  using ( 𝔻[_] )
-open import Setoid.Algebras.Finite                 using ( FiniteAlgebra ; 𝟏 ; 𝟏-FiniteAlgebra )
-open import Setoid.Algebras.Finite.Irredundant     using ( IrredundantEnumeration
-                                                         ; irredundantEnumeration )
+-- Imports from agda-algebras ----------------------------------------------------
+open import Classical.Signatures.Group          using  ( Sig-Group )
+open import Setoid.Algebras.Basic               using  ( 𝔻[_] )
+open import Setoid.Algebras.Finite              using  ( FiniteAlgebra ; 𝟏
+                                                       ; 𝟏-FiniteAlgebra )
+open import Setoid.Algebras.Finite.Irredundant  using  ( IrredundantEnumeration
+                                                       ; irredundantEnumeration )
 
 import Overture
 
--- Imports from this library
-open import Groups.Finite.Setoid                   using ( FiniteSetoid ; fromInverse ; Finᶠ ; transport
-                                                         ; fromIrredundant ; toIrredundant ; toFiniteAlgebra
-                                                         ; injective⇒≤ ; bijection⇒≡ ; inverse⇒≡ ; size-unique
-                                                         ; pigeonhole ; pigeonholeˢ ; injective⇒onto-Fin
-                                                         ; injective⇒onto )
-open import Groups.Finite.Subset                   using ( DecSubset ; set ; respects ; decide ; ∁ ; full
-                                                         ; empty ; subsetoid ; module Counting )
-open import Groups.Finite.Sum                      using ( _⊎ᶠ_ ; _×ᶠ_ ; ∷-inverse ; _^ᶠ_ ; size-^ᶠ ; 𝟙
-                                                         ; ∣tabulate∣≡∑ ; ∑-const ; ∑-δ ; ∣P∣≡∑ ; ∑-unique
-                                                         ; module Partition ; enumerable⇒finite ; sumOn
-                                                         ; ∣-sum ; sumOn-1 ; sumOn-cong ; sum≡sumOn+sumOn∁
-                                                         ; p∣sumOn∁ ; sum≡sumOn+q*p ; sum%p≡sumOn%p
-                                                         ; p∣sum⇔p∣sumOn )
+-- Imports from agda-groups ------------------------------------------------------
+open import Groups.Finite.Setoid  using  ( FiniteSetoid ; fromInverse ; transport
+                                         ; Finᶠ ; fromIrredundant ; toIrredundant
+                                         ; toFiniteAlgebra ; injective⇒≤
+                                         ; bijection⇒≡ ; inverse⇒≡ ; size-unique
+                                         ; pigeonhole ; pigeonholeˢ
+                                         ; injective⇒onto-Fin ; injective⇒onto )
+open import Groups.Finite.Subset  using  ( DecSubset ; set ; respects ; decide
+                                         ; ∁ ; full ; empty ; subsetoid
+                                         ; module Counting )
+open import Groups.Finite.Sum     using  ( _⊎ᶠ_ ; _×ᶠ_ ; ∷-inverse ; _^ᶠ_ ; size-^ᶠ ; 𝟙
+                                         ; ∣tabulate∣≡∑ ; ∑-const ; ∑-δ ; ∣P∣≡∑
+                                         ; ∑-unique ; module Partition ; sumOn
+                                         ; enumerable⇒finite ; ∣-sum ; sumOn-1
+                                         ; sumOn-cong ; sum≡sumOn+sumOn∁ ; p∣sumOn∁
+                                         ; sum≡sumOn+q*p ; sum%p≡sumOn%p
+                                         ; p∣sum⇔p∣sumOn )
 
 open FiniteSetoid using ( size ; enum ; idx )
 ```
@@ -113,8 +122,9 @@ _≡₃?_ : Decidable _≡₃_
 i ≡₃? j = toℕ i % 3 ≟ℕ toℕ j % 3
 
 module Mod3 = Partition F₆ ≡₃-equivalence _≡₃?_ (cong (λ i → toℕ i % 3))
-open Mod3 using ( classSetoid ; classes ; class ; least⟨_⟩ ; least ; least-∼ ; least-cong ; first
-                ; size-classes ; size≡∑∣class∣ ; size≡#classes*k )
+open Mod3 using  ( classSetoid ; classes ; class ; least⟨_⟩ ; least ; least-∼
+                 ; least-cong ; first ; size-classes ; size≡∑∣class∣
+                 ; size≡#classes*k )
 
 -- Z₃: the classes of congruence modulo 3, counted by their first members.
 Z₃ : FiniteSetoid classSetoid
@@ -141,7 +151,8 @@ idx-Z₃ : idx Z₃ 4F ≡ 1F × idx Z₃ 5F ≡ 2F
 idx-Z₃ = refl , refl
 
 -- Decidable equality: 1 and 4 are equal in Z₃, 1 and 5 are not.
-≟-Z₃ : does (FiniteSetoid._≟_ Z₃ 1F 4F) ≡ true × does (FiniteSetoid._≟_ Z₃ 1F 5F) ≡ false
+≟-Z₃ : does (FiniteSetoid._≟_ Z₃ 1F 4F) ≡ true ×
+       does (FiniteSetoid._≟_ Z₃ 1F 5F) ≡ false
 ≟-Z₃ = refl , refl
 
 -- Congruence to a fixed element respects congruence.
@@ -149,19 +160,23 @@ idx-Z₃ = refl , refl
 ≡₃-resp j {x} {y} x∼y x∼j = trans (sym x∼y) x∼j
 
 -- The search for an element congruent to 5 finds 2, the first member of its class.
-any?-Z₃ : proj₁ (toWitness {a? = FiniteSetoid.any? Z₃ (λ {x} {y} → ≡₃-resp 5F {x} {y}) (λ x → x ≡₃? 5F)} tt) ≡ 2F
+any?-Z₃ : toWitness {a? = FiniteSetoid.any? Z₃  (λ {x} {y} → ≡₃-resp 5F {x} {y})
+                                                (λ x → x ≡₃? 5F)} tt .proj₁ ≡ 2F
 any?-Z₃ = refl
 
 -- Not every element is congruent to 0.
-all?-Z₃ : does (FiniteSetoid.all? Z₃ (λ {x} {y} → ≡₃-resp 0F {x} {y}) (λ x → x ≡₃? 0F)) ≡ false
+all?-Z₃ :  does (FiniteSetoid.all? Z₃ (λ {x} {y} → ≡₃-resp 0F {x} {y}) (λ x → x ≡₃? 0F))
+           ≡ false
 all?-Z₃ = refl
 
 -- The bijection with Fin 3, as a finite structure on Z₃.
-fromInverse-Z₃ : size (fromInverse (FiniteSetoid.↔Fin Z₃)) ≡ 3 × enum (fromInverse (FiniteSetoid.↔Fin Z₃)) 2F ≡ 2F
+fromInverse-Z₃ :  size (fromInverse (FiniteSetoid.↔Fin Z₃)) ≡ 3 ×
+                  enum (fromInverse (FiniteSetoid.↔Fin Z₃)) 2F ≡ 2F
 fromInverse-Z₃ = refl , refl
 
 -- Z₃'s finite structure, carried along the bijection to Fin 3.
-transport-Z₃ : size (transport (FiniteSetoid.↔Fin Z₃) Z₃) ≡ 3 × idx (transport (FiniteSetoid.↔Fin Z₃) Z₃) 1F ≡ 1F
+transport-Z₃ :  size (transport (FiniteSetoid.↔Fin Z₃) Z₃) ≡ 3 ×
+                idx (transport (FiniteSetoid.↔Fin Z₃) Z₃) 1F ≡ 1F
 transport-Z₃ = refl , refl
 
 -- agda-algebras' one-element algebra of the signature of groups, as a finite setoid.
@@ -169,13 +184,16 @@ transport-Z₃ = refl , refl
 𝟏ᶠ = fromIrredundant (irredundantEnumeration (𝟏-FiniteAlgebra {𝑆 = Sig-Group}))
 
 -- The passages back to agda-algebras' structures keep its size, 1.
-passages-𝟏 : size 𝟏ᶠ ≡ 1 × IrredundantEnumeration.icard (toIrredundant {𝑨 = 𝟏 {𝑆 = Sig-Group}} 𝟏ᶠ) ≡ 1
-           × FiniteAlgebra.card (toFiniteAlgebra {𝑨 = 𝟏 {𝑆 = Sig-Group}} 𝟏ᶠ) ≡ 1
+passages-𝟏 :
+  size 𝟏ᶠ ≡ 1 ×
+  IrredundantEnumeration.icard (toIrredundant {𝑨 = 𝟏 {𝑆 = Sig-Group}} 𝟏ᶠ) ≡ 1 ×
+  FiniteAlgebra.card (toFiniteAlgebra {𝑨 = 𝟏 {𝑆 = Sig-Group}} 𝟏ᶠ) ≡ 1
 passages-𝟏 = refl , refl , refl
 
 -- The least member of each class is a one-to-one map from Z₃ into Fin 6 ...
 least-inj : ∀ {x y} → least x ≡ least y → x ≡₃ y
-least-inj {x} {y} e = trans (sym (least-∼ x)) (trans (cong (λ i → toℕ i % 3) e) (least-∼ y))
+least-inj {x} {y} e = trans  (sym (least-∼ x))
+                             (trans (cong (λ i → toℕ i % 3) e) (least-∼ y))
 
 -- ... so 3 ≤ 6.
 injective⇒≤-Z₃ : size Z₃ ≤ size F₆
@@ -190,13 +208,14 @@ size-unique-Z₃ : size Z₃ ≡ size (fromInverse (FiniteSetoid.↔Fin Z₃))
 size-unique-Z₃ = size-unique Z₃ (fromInverse (FiniteSetoid.↔Fin Z₃))
 
 -- The pigeonhole principle: 0, 1, 2, 3 into Z₃; 0 and 3 collide.
-pigeonhole-Z₃ : proj₁ (pigeonhole Z₃ (n<1+n 3) (λ i → i ↑ˡ 2)) ≡ 0F
-              × proj₁ (proj₂ (pigeonhole Z₃ (n<1+n 3) (λ i → i ↑ˡ 2))) ≡ 3F
+pigeonhole-Z₃ : pigeonhole Z₃ (n<1+n 3) (λ i → i ↑ˡ 2) .proj₁ ≡ 0F ×
+                pigeonhole Z₃ (n<1+n 3) (λ i → i ↑ˡ 2) .proj₂ .proj₁ ≡ 3F
 pigeonhole-Z₃ = refl , refl
 
 -- The form between finite setoids: Fin 6 into Z₃, where 0 and 3 collide.
-pigeonholeˢ-Z₃ : proj₁ (pigeonholeˢ F₆ Z₃ (toWitness {a? = 3 <? 6} tt) (λ i → i)) ≡ 0F
-               × proj₁ (proj₂ (pigeonholeˢ F₆ Z₃ (toWitness {a? = 3 <? 6} tt) (λ i → i))) ≡ 3F
+pigeonholeˢ-Z₃ :
+  pigeonholeˢ F₆ Z₃ (toWitness {a? = 3 <? 6} tt) id .proj₁ ≡ 0F ×
+  pigeonholeˢ F₆ Z₃ (toWitness {a? = 3 <? 6} tt) id .proj₂ .proj₁ ≡ 3F
 pigeonholeˢ-Z₃ = refl , refl
 ```
 
@@ -217,10 +236,12 @@ injectivity is decided over the 36 pairs.
 
 -- σ is one-to-one on Z₃, decided over the 36 pairs ...
 σ-inj : ∀ {x y} → σ x ≡₃ σ y → x ≡₃ y
-σ-inj {x} {y} = toWitness {a? = Fin.all? λ x → Fin.all? λ y → (σ x ≡₃? σ y) →? (x ≡₃? y)} tt x y
+σ-inj {x} {y} =
+  toWitness {a? = Fin.all? λ x → Fin.all? λ y → (σ x ≡₃? σ y) →? (x ≡₃? y)} tt x y
 
 -- ... so it is onto, and the preimage of the class of 0 it finds is 2.
-injective⇒onto-Z₃ : proj₁ (injective⇒onto Z₃ Z₃ refl σ (λ {x} {y} → σ-inj {x} {y}) 0F) ≡ 2F
+injective⇒onto-Z₃ :
+  injective⇒onto Z₃ Z₃ refl σ (λ {x} {y} → σ-inj {x} {y}) 0F .proj₁ ≡ 2F
 injective⇒onto-Z₃ = refl
 ```
 
@@ -261,10 +282,13 @@ rot 2F = 0F
 
 -- It is one-to-one, decided over the nine pairs ...
 rot-inj : ∀ {i j} → rot i ≡ rot j → i ≡ j
-rot-inj {i} {j} = toWitness {a? = Fin.all? λ i → Fin.all? λ j → (rot i Fin.≟ rot j) →? (i Fin.≟ j)} tt i j
+rot-inj {i} {j} =
+  toWitness  {a? = Fin.all? λ i → Fin.all? λ j → (rot i Fin.≟ rot j) →? (i Fin.≟ j)}
+             tt i j
 
 -- ... so it is onto, and the preimage of 0 it finds is 2.
-injective⇒onto-Fin-rot : proj₁ (injective⇒onto-Fin rot (λ {i} {j} → rot-inj {i} {j}) 0F) ≡ 2F
+injective⇒onto-Fin-rot :
+  injective⇒onto-Fin rot (λ {i} {j} → rot-inj {i} {j}) 0F .proj₁ ≡ 2F
 injective⇒onto-Fin-rot = refl
 ```
 
@@ -276,19 +300,25 @@ inclusions and the witness of the failed one; the size lemmas; the
 multiples of 3 as a finite setoid; and a table read back as a subset.
 
 ```agda
-open Counting F₆ using ( table ; ∣_∣ ; lookup-table ; T-table⇒∈ ; ∈⇒T-table ; ∈table⇒∈ ; ∈⇒∈table
-                       ; _⊆?_ ; _≐?_ ; ⊈⇒∃ ; table-cong ; P≐Q⇒∣P∣≡∣Q∣ ; ∣P∣≤n ; ∣full∣≡n ; ∣empty∣≡0
-                       ; table-mono ; P⊆Q⇒∣P∣≤∣Q∣ ; P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ ; P⊂Q⇒∣P∣<∣Q∣ ; table-∁
-                       ; ∣∁P∣≡n∸∣P∣ ; ∣P∣+∣∁P∣≡n ; P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P ; P⊆Q∧∣P∣≡∣Q∣⇒P≐Q ; ∣P∣≡n⇒∈P
-                       ; ∈⇒0<∣P∣ ; 0<∣P∣⇒∃ ; fromTable ; table-fromTable ; fromTable-table ; finite )
+open Counting F₆ using  ( table ; ∣_∣ ; lookup-table ; T-table⇒∈ ; ∈⇒T-table
+                        ; ∈table⇒∈ ; ∈⇒∈table ; _⊆?_ ; _≐?_ ; ⊈⇒∃ ; table-cong
+                        ; P≐Q⇒∣P∣≡∣Q∣ ; ∣P∣≤n ; ∣full∣≡n ; ∣empty∣≡0 ; table-mono
+                        ; P⊆Q⇒∣P∣≤∣Q∣ ; P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ ; P⊂Q⇒∣P∣<∣Q∣ ; table-∁
+                        ; ∣∁P∣≡n∸∣P∣ ; ∣P∣+∣∁P∣≡n ; P⊆Q∧∣Q∣≤∣P∣⇒Q⊆P ; fromTable
+                        ; P⊆Q∧∣P∣≡∣Q∣⇒P≐Q ; ∣P∣≡n⇒∈P ; ∈⇒0<∣P∣ ; 0<∣P∣⇒∃
+                        ; table-fromTable ; fromTable-table ; finite )
 
 -- The multiples of 3.
 M₃ : DecSubset (≡.setoid (Fin 6)) 0ℓ
-M₃ = record { set = λ i → toℕ i % 3 ≡ 0 ; respects = λ { refl m → m } ; decide = λ i → toℕ i % 3 ≟ℕ 0 }
+M₃ = record  { set       = λ i → toℕ i % 3 ≡ 0
+             ; respects  = λ { refl m → m }
+             ; decide    = λ i → toℕ i % 3 ≟ℕ 0 }
 
 -- The indices below 4.
 B₄ : DecSubset (≡.setoid (Fin 6)) 0ℓ
-B₄ = record { set = λ i → toℕ i < 4 ; respects = λ { refl b → b } ; decide = λ i → toℕ i <? 4 }
+B₄ = record  { set       = λ i → toℕ i < 4
+             ; respects  = λ { refl b → b }
+             ; decide    = λ i → toℕ i <? 4 }
 
 -- The multiples of 3 lie below 4, decided over Fin 6.
 M₃⊆B₄ : set M₃ ⊆ set B₄
@@ -310,7 +340,7 @@ B₄⊈M₃ : set B₄ ⊈ set M₃
 B₄⊈M₃ = toWitnessFalse {a? = B₄ ⊆? M₃} tt
 
 -- The element of B₄ outside M₃ that the search finds is 1.
-⊈⇒∃-B₄-M₃ : proj₁ (⊈⇒∃ B₄ M₃ B₄⊈M₃) ≡ 1F
+⊈⇒∃-B₄-M₃ : ⊈⇒∃ B₄ M₃ B₄⊈M₃ .proj₁ ≡ 1F
 ⊈⇒∃-B₄-M₃ = refl
 
 -- The size lemmas, instantiated: each states what the sizes above compute.
@@ -324,7 +354,8 @@ P⊂Q⇒∣P∣<∣Q∣-M₃ = P⊂Q⇒∣P∣<∣Q∣ M₃ B₄ (M₃⊆B₄ , 
 
 -- B₄ holds 1, which M₃ does not, so M₃ is smaller.
 P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣-M₃ : ∣ M₃ ∣ < ∣ B₄ ∣
-P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣-M₃ = P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ M₃ B₄ M₃⊆B₄ {1F} (toWitness {a? = 1 <? 4} tt) (λ ())
+P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣-M₃ =
+  P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ M₃ B₄ M₃⊆B₄ {1F} (toWitness {a? = 1 <? 4} tt) λ ()
 
 -- M₃ and its complement together have six elements.
 ∣P∣+∣∁P∣≡n-M₃ : ∣ M₃ ∣ + ∣ ∁ M₃ ∣ ≡ 6
@@ -332,7 +363,9 @@ P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣-M₃ = P⊆Q∧x∈Q∖P⇒∣P∣<∣Q∣ M
 
 -- The multiples of 3 again, as the i with 2i ≡ 0 modulo 6.
 M₃′ : DecSubset (≡.setoid (Fin 6)) 0ℓ
-M₃′ = record { set = λ i → (2 * toℕ i) % 6 ≡ 0 ; respects = λ { refl m → m } ; decide = λ i → (2 * toℕ i) % 6 ≟ℕ 0 }
+M₃′ = record  { set = λ i → (2 * toℕ i) % 6 ≡ 0
+              ; respects = λ { refl m → m }
+              ; decide = λ i → (2 * toℕ i) % 6 ≟ℕ 0 }
 
 -- One inclusion, decided over Fin 6 ...
 M₃⊆M₃′ : ∀ {i} → i ∈ set M₃ → i ∈ set M₃′
@@ -340,7 +373,7 @@ M₃⊆M₃′ {i} = toWitness {a? = Fin.all? λ i → decide M₃ i →? decide
 
 -- ... and the sizes give the other, here at 3.
 P⊆Q∧∣P∣≡∣Q∣⇒P≐Q-M₃ : 3F ∈ set M₃′ → 3F ∈ set M₃
-P⊆Q∧∣P∣≡∣Q∣⇒P≐Q-M₃ = proj₂ (P⊆Q∧∣P∣≡∣Q∣⇒P≐Q M₃ M₃′ (λ {i} → M₃⊆M₃′ {i}) refl) {3F}
+P⊆Q∧∣P∣≡∣Q∣⇒P≐Q-M₃ = P⊆Q∧∣P∣≡∣Q∣⇒P≐Q M₃ M₃′ (λ {i} → M₃⊆M₃′ {i}) refl .proj₂ {3F}
 
 -- The complement of the empty subset.
 ∅ᶜ : DecSubset (≡.setoid (Fin 6)) 0ℓ
@@ -351,11 +384,13 @@ P⊆Q∧∣P∣≡∣Q∣⇒P≐Q-M₃ = proj₂ (P⊆Q∧∣P∣≡∣Q∣⇒P�
 ∣P∣≡n⇒∈P-5 = ∣P∣≡n⇒∈P ∅ᶜ refl 5F
 
 -- M₃ holds 3, so its size is positive, and the member found is 0.
-0<∣P∣⇒∃-M₃ : proj₁ (0<∣P∣⇒∃ M₃ (∈⇒0<∣P∣ M₃ {3F} refl)) ≡ 0F
+0<∣P∣⇒∃-M₃ : 0<∣P∣⇒∃ M₃ (∈⇒0<∣P∣ M₃ {3F} refl) .proj₁ ≡ 0F
 0<∣P∣⇒∃-M₃ = refl
 
 -- The multiples of 3 as a finite setoid: its second element is 3, at position 1.
-finite-M₃ : size (finite M₃) ≡ 2 × proj₁ (enum (finite M₃) 1F) ≡ 3F × idx (finite M₃) (3F , refl) ≡ 1F
+finite-M₃ :  size (finite M₃) ≡ 2 ×
+             enum (finite M₃) 1F .proj₁ ≡ 3F ×
+             idx (finite M₃) (3F , refl) ≡ 1F
 finite-M₃ = refl , refl , refl
 
 -- M₃'s table, read back as a subset, has M₃'s table.
@@ -363,7 +398,8 @@ table-fromTable-M₃ : table (fromTable (table M₃)) ≡ table M₃
 table-fromTable-M₃ = refl
 
 -- That subset holds 3 and not 4.
-fromTable-table-M₃ : does (decide (fromTable (table M₃)) 3F) ≡ true × does (decide (fromTable (table M₃)) 4F) ≡ false
+fromTable-table-M₃ :  does (decide (fromTable (table M₃)) 3F) ≡ true ×
+                      does (decide (fromTable (table M₃)) 4F) ≡ false
 fromTable-table-M₃ = refl , refl
 ```
 
@@ -423,7 +459,8 @@ table-mono-M₃ : table M₃ Sub.⊆ table B₄
 table-mono-M₃ = table-mono M₃ B₄ (λ {i} → M₃⊆B₄ {i})
 
 -- The complement's table is the complement of the table.
-table-∁-M₃ : table (∁ M₃) ≡ Sub.∁ (table M₃) × table (∁ M₃) ≡ false ∷ true ∷ true ∷ false ∷ true ∷ true ∷ []
+table-∁-M₃ :  table (∁ M₃) ≡ Sub.∁ (table M₃) ×
+              table (∁ M₃) ≡ false ∷ true ∷ true ∷ false ∷ true ∷ true ∷ []
 table-∁-M₃ = table-∁ M₃ , refl
 
 -- The complement has size 6 ∸ 2.
@@ -440,7 +477,7 @@ table-fromTable-t = table-fromTable (table M₃)
 
 -- The round trip from a subset, at 3: the subset read from M₃'s table lies in M₃.
 fromTable-table-3 : 3F ∈ set (fromTable (table M₃)) → 3F ∈ set M₃
-fromTable-table-3 = proj₁ (fromTable-table M₃) {3F}
+fromTable-table-3 = fromTable-table M₃ .proj₁ {3F}
 ```
 
 The respect of `≈` is needed for "a subset of a subset with the same size
@@ -452,12 +489,18 @@ same size 1, yet `false` lies in the whole setoid and not in it.
 ```agda
 -- Bool with every two elements equal ...
 Bool⊤ : Setoid 0ℓ 0ℓ
-Bool⊤ = record { Carrier = Bool ; _≈_ = λ _ _ → ⊤
-               ; isEquivalence = record { refl = tt ; sym = λ _ → tt ; trans = λ _ _ → tt } }
+Bool⊤ = record  { Carrier = Bool
+                ; _≈_ = λ _ _ → ⊤
+               ; isEquivalence = record  { refl = tt
+                                         ; sym = λ _ → tt
+                                         ; trans = λ _ _ → tt } }
 
 -- ... enumerated by true alone.
 Bool⊤ᶠ : FiniteSetoid Bool⊤
-Bool⊤ᶠ = record { size = 1 ; enum = λ _ → true ; enum-sur = λ _ → 0F , tt ; enum-inj = λ { {0F} {0F} _ → refl } }
+Bool⊤ᶠ = record  { size = 1
+                ; enum = λ _ → true
+                ; enum-sur = λ _ → 0F , tt
+                ; enum-inj = λ { {0F} {0F} _ → refl } }
 
 -- "is true" does not respect ≈ ...
 is-true-disrespects : ¬ ((_≡ true) Respects (Setoid._≈_ Bool⊤))
@@ -465,7 +508,8 @@ is-true-disrespects resp with resp {true} {false} tt refl
 ... | ()
 
 -- ... and its decisions at the enumeration count 1, as the whole setoid's do.
-respect-needed : Sub.∣ Vec.tabulate (λ i → does (enum Bool⊤ᶠ i Bool.≟ true)) ∣ ≡ Counting.∣_∣ Bool⊤ᶠ full
+respect-needed :  Sub.∣ Vec.tabulate (λ i → does (enum Bool⊤ᶠ i Bool.≟ true)) ∣
+                  ≡ Counting.∣_∣ Bool⊤ᶠ full
 respect-needed = refl
 ```
 
@@ -478,11 +522,15 @@ modulo 3.
 
 ```agda
 -- Fin 2 ⊎ Z₃: five elements; the fourth is the class of 1, and 5 sits at 4.
-⊎ᶠ-2-Z₃ : size (Finᶠ 2 ⊎ᶠ Z₃) ≡ 5 × enum (Finᶠ 2 ⊎ᶠ Z₃) 3F ≡ inj₂ 1F × idx (Finᶠ 2 ⊎ᶠ Z₃) (inj₂ 5F) ≡ 4F
+⊎ᶠ-2-Z₃ :  size (Finᶠ 2 ⊎ᶠ Z₃) ≡ 5 ×
+           enum (Finᶠ 2 ⊎ᶠ Z₃) 3F ≡ inj₂ 1F ×
+           idx (Finᶠ 2 ⊎ᶠ Z₃) (inj₂ 5F) ≡ 4F
 ⊎ᶠ-2-Z₃ = refl , refl , refl
 
 -- Fin 2 × Z₃: six elements; (1, 4) sits at 1·3 + 1 = 4, and 5 is (1, 2).
-×ᶠ-2-Z₃ : size (Finᶠ 2 ×ᶠ Z₃) ≡ 6 × idx (Finᶠ 2 ×ᶠ Z₃) (1F , 4F) ≡ 4F × enum (Finᶠ 2 ×ᶠ Z₃) 5F ≡ (1F , 2F)
+×ᶠ-2-Z₃ :  size (Finᶠ 2 ×ᶠ Z₃) ≡ 6 ×
+           idx (Finᶠ 2 ×ᶠ Z₃) (1F , 4F) ≡ 4F ×
+           enum (Finᶠ 2 ×ᶠ Z₃) 5F ≡ (1F , 2F)
 ×ᶠ-2-Z₃ = refl , refl , refl
 
 -- The functions from Fin 2 to Z₃: 3² = 9 of them; 0 ↦ 4, 1 ↦ 2 sits at 1·3 + 2 = 5.
@@ -502,7 +550,9 @@ size-^ᶠ-Z₃-2 = size-^ᶠ Z₃ 2
 ∑-unique-4 = refl
 
 -- The partition modulo 3: three classes of two elements, and 6 = 2 + 2 + 2 = 3 · 2.
-classes-mod-3 : ∣ class 0F ∣ ≡ 2 × ∣ class 4F ∣ ≡ 2 × ∑[ c < size Z₃ ] ∣ class (enum Z₃ c) ∣ ≡ 6
+classes-mod-3 :  ∣ class 0F ∣ ≡ 2 ×
+                 ∣ class 4F ∣ ≡ 2 ×
+                 ∑[ c < size Z₃ ] ∣ class (enum Z₃ c) ∣ ≡ 6
 classes-mod-3 = refl , refl , refl
 
 -- The size of Fin 6 is the sum of the sizes of its classes modulo 3.
@@ -521,20 +571,29 @@ size≡#classes*k-mod-3 = size≡#classes*k Z₃ every-class-2
 _~₄_ : Fin 6 → Fin 6 → Set
 i ~₄ j = does (toℕ i <? 4) ≡ does (toℕ j <? 4)
 
-module Below4 = Partition F₆ (_~₄_ , record { refl = refl ; sym = sym ; trans = trans })
-                              (λ i j → does (toℕ i <? 4) Bool.≟ does (toℕ j <? 4)) (cong (λ i → does (toℕ i <? 4)))
+module Below4 = Partition F₆  (_~₄_ , record  { refl = refl
+                                              ; sym = sym
+                                              ; trans = trans })
+                              (λ i j → does (toℕ i <? 4) Bool.≟ does (toℕ j <? 4))
+                              (cong (λ i → does (toℕ i <? 4)))
 
 -- Two classes, with first members 0 and 4 and sizes 4 and 2.
-below-4 : size Below4.classes ≡ 2 × enum Below4.classes 0F ≡ 0F × enum Below4.classes 1F ≡ 4F
-        × ∣ Below4.class 0F ∣ ≡ 4 × ∣ Below4.class 5F ∣ ≡ 2
+below-4 :  size Below4.classes ≡ 2 ×
+           enum Below4.classes 0F ≡ 0F ×
+           enum Below4.classes 1F ≡ 4F ×
+           ∣ Below4.class 0F ∣ ≡ 4 ×
+           ∣ Below4.class 5F ∣ ≡ 2
 below-4 = refl , refl , refl , refl , refl
 
 -- The size of Fin 6 is 4 + 2, the sum of the sizes of the two classes.
-size≡∑∣class∣-below-4 : size F₆ ≡ ∑[ c < size Below4.classes ] ∣ Below4.class (enum Below4.classes c) ∣
+size≡∑∣class∣-below-4 :
+  size F₆ ≡ ∑[ c < size Below4.classes ] ∣ Below4.class (enum Below4.classes c) ∣
 size≡∑∣class∣-below-4 = Below4.size≡∑∣class∣ Below4.classes
 
--- The classes modulo 3, enumerated with repetitions by Fin 6 itself: a finite setoid of size 3.
-enumerable⇒finite-mod-3 : size (enumerable⇒finite {T = classSetoid} (λ i → i) (λ y → y , refl) _≡₃?_) ≡ 3
+-- The classes modulo 3, enumerated with repetitions by Fin 6 itself:
+-- a finite setoid of size 3.
+enumerable⇒finite-mod-3 :
+  size (enumerable⇒finite {T = classSetoid} (λ i → i) (λ y → y , refl) _≡₃?_) ≡ 3
 enumerable⇒finite-mod-3 = refl
 
 -- A sum modulo 3: the terms 1, 3, 1, 6, 9, 1.
@@ -564,8 +623,10 @@ One? i = f₆ i ≟ℕ 1
 3∣f₆ 5F ¬o = ⊥-elim (¬o refl)
 
 -- The sum is 21, the sum of the ones 3, and 21 = 3 + 6 · 3.
-sums-mod-3 : sum f₆ ≡ 21 × sumOn One? f₆ ≡ 3 × proj₁ (sum≡sumOn+q*p One? f₆ 3∣f₆) ≡ 6
-           × sumOn One? (λ _ → 1) ≡ 3
+sums-mod-3 :  sum f₆ ≡ 21 ×
+              sumOn One? f₆ ≡ 3 ×
+              sum≡sumOn+q*p One? f₆ 3∣f₆ .proj₁ ≡ 6 ×
+              sumOn One? (λ _ → 1) ≡ 3
 sums-mod-3 = refl , refl , refl , refl
 
 -- On the ones, f₆ agrees with 1.
@@ -577,7 +638,8 @@ sum%p≡sumOn%p-f₆ : sum f₆ % 3 ≡ sumOn One? f₆ % 3
 sum%p≡sumOn%p-f₆ = sum%p≡sumOn%p One? f₆ 3∣f₆
 
 -- 3 divides 21, so 3 divides the sum of the ones, with quotient 1.
-p∣sum⇔p∣sumOn-f₆ : _∣_.quotient (Equivalence.to (p∣sum⇔p∣sumOn One? f₆ 3∣f₆) (divides 7 refl)) ≡ 1
+p∣sum⇔p∣sumOn-f₆ :
+  _∣_.quotient (Equivalence.to (p∣sum⇔p∣sumOn One? f₆ 3∣f₆) (divides 7 refl)) ≡ 1
 p∣sum⇔p∣sumOn-f₆ = refl
 ```
 
@@ -588,12 +650,14 @@ the two steps of the sums modulo p.
 
 ```agda
 -- A function from Fin 2 is its head and its tail.
-∷-inverse-Z₃ : proj₁ (Inverse.from (∷-inverse {S = classSetoid} 1) (4F ∷ᶠ (2F ∷ᶠ []ᶠ))) ≡ 4F
-             × Inverse.to (∷-inverse {S = classSetoid} 1) (4F , (2F ∷ᶠ []ᶠ)) 1F ≡ 2F
+∷-inverse-Z₃ :
+  Inverse.from (∷-inverse {S = classSetoid} 1) (4F ∷ᶠ (2F ∷ᶠ []ᶠ)) .proj₁ ≡ 4F ×
+  Inverse.to (∷-inverse {S = classSetoid} 1) (4F , (2F ∷ᶠ []ᶠ)) 1F ≡ 2F
 ∷-inverse-Z₃ = refl , refl
 
 -- The size of a table as a sum of indicators.
-∣tabulate∣≡∑-M₃ : Sub.∣ Vec.tabulate (λ i → does (decide M₃ i)) ∣ ≡ ∑[ i < 6 ] 𝟙 (does (decide M₃ i))
+∣tabulate∣≡∑-M₃ :
+  Sub.∣ Vec.tabulate (λ i → does (decide M₃ i)) ∣ ≡ ∑[ i < 6 ] 𝟙 (does (decide M₃ i))
 ∣tabulate∣≡∑-M₃ = ∣tabulate∣≡∑ (λ i → does (decide M₃ i))
 
 -- A constant sum: six 2s make 12.
@@ -617,15 +681,18 @@ least-cong-1-4 : least 1F ≡ least 4F × least 4F ≡ 1F
 least-cong-1-4 = least-cong {1F} {4F} refl , refl
 
 -- The number of classes is the number of first members.
-size-classes-mod-3 : size classes ≡ Counting.∣_∣ (Finᶠ 6) first × Counting.∣_∣ (Finᶠ 6) first ≡ 3
+size-classes-mod-3 :  size classes ≡ Counting.∣_∣ (Finᶠ 6) first ×
+                      Counting.∣_∣ (Finᶠ 6) first ≡ 3
 size-classes-mod-3 = size-classes , refl
 
 -- 3 divides a sum of six 3s, with quotient 6.
-∣-sum-3s : _∣_.quotient (∣-sum {p = 3} (λ (_ : Fin 6) → 3) (λ _ → divides 1 refl)) ≡ 6
+∣-sum-3s :
+  _∣_.quotient (∣-sum {p = 3} (λ (_ : Fin 6) → 3) (λ _ → divides 1 refl)) ≡ 6
 ∣-sum-3s = refl
 
 -- The sum of 1, 3, 1, 6, 9, 1 is the sum of its ones and of its other terms, 3 + 18.
-sum≡sumOn+sumOn∁-f₆ : sum f₆ ≡ sumOn One? f₆ + sumOn (¬? ∘ One?) f₆ × sumOn (¬? ∘ One?) f₆ ≡ 18
+sum≡sumOn+sumOn∁-f₆ :  sum f₆ ≡ sumOn One? f₆ + sumOn (¬? ∘ One?) f₆ ×
+                       sumOn (¬? ∘ One?) f₆ ≡ 18
 sum≡sumOn+sumOn∁-f₆ = sum≡sumOn+sumOn∁ One? f₆ , refl
 
 -- The sum of 1 over the ones is the number of ones.
