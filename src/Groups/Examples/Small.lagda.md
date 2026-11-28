@@ -26,26 +26,28 @@ library's theorems about it (A₅ is simple, say) apply unchanged.
 
 module Groups.Examples.Small where
 
--- Imports from the Agda Standard Library
-open import Data.Fin                               using ( Fin ; #_ )
-open import Data.Product.Base                      using ( proj₂ )
-open import Level                                  using ( 0ℓ )
+-- Imports from agda-stdlib ----------------------------------------------------
+open import Data.Fin           using  ( Fin ; #_ )
+open import Data.Product.Base  using  ( proj₂ )
+open import Level              using  ( 0ℓ )
 
--- Imports from the Agda Universal Algebra Library
+-- Imports from agda-algebras ----------------------------------------------------
 open import Examples.Classical.Groups.AlternatingGroup5
-                                                   using ( a5-group )
+                               using  ( a5-group )
 open import Examples.Classical.Groups.AlternatingGroup5.Tables
-                                                   using ( a5-gen-s ; a5-gen-t )
-open import Examples.Classical.Groups.CyclicGroup3 using ( z3-group )
-open import Examples.Classical.Groups.CyclicGroup6 using ( z2-group ; z6-group )
+                               using  ( a5-gen-s ; a5-gen-t )
+open import Examples.Classical.Groups.CyclicGroup3
+                               using  ( z3-group )
+open import Examples.Classical.Groups.CyclicGroup6
+                               using  ( z2-group ; z6-group )
 open import Examples.Classical.Groups.KleinFourGroup
-                                                   using ( v4-group )
+                               using  ( v4-group )
 open import Examples.Classical.Groups.SymmetricGroup3
-                                                   using ( s3-group )
+                               using  ( s3-group )
 
--- Imports from this library
-open import Groups.Finite.Group                    using ( FiniteGroup )
-open import Groups.Table                           using ( onFin )
+-- Imports from agda-groups ------------------------------------------------------
+open import Groups.Finite.Group  using  ( FiniteGroup )
+open import Groups.Table         using  ( onFin )
 ```
 -->
 

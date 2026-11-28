@@ -27,39 +27,44 @@ by its Boolean, `does`.
 
 module Groups.Table.Examples where
 
--- Imports from the Agda Standard Library
-open import Data.Bool.Base                         using ( Bool ; true ; false )
-open import Data.Fin.Base                          using ( Fin )
-open import Data.Fin.Patterns                      using ( 0F ; 1F ; 2F ; 3F ; 4F ; 5F )
-open import Data.List.Base                         using ( [] ; _∷_ )
-open import Data.Nat.Base                          using ( nonZero )
-open import Data.Vec.Base                          using ( Vec ; lookup ; tabulate )
-                                                   renaming ( [] to []ᵛ ; _∷_ to infixr 5 _∷ᵛ_ )
-open import Level                                  using ( 0ℓ )
-open import Relation.Binary.PropositionalEquality  using ( _≡_ ; refl )
-open import Relation.Nullary.Decidable             using ( does ; from-yes )
+-- Imports from agda-stdlib ----------------------------------------------------
+open import Data.Bool.Base              using  ( Bool ; true ; false )
+open import Data.Fin.Base               using  ( Fin )
+open import Data.Fin.Patterns           using  ( 0F ; 1F ; 2F ; 3F ; 4F ; 5F )
+open import Data.List.Base              using  ( [] ; _∷_ )
+open import Data.Nat.Base               using  ( nonZero )
+open import Data.Vec.Base               using  ( Vec ; lookup ; tabulate )
+                                        renaming ( [] to []ᵛ
+                                                 ; _∷_ to infixr 5 _∷ᵛ_ )
+open import Level                       using  ( 0ℓ )
+open import Relation.Binary.PropositionalEquality
+                                        using  ( _≡_ ; refl )
+open import Relation.Nullary.Decidable  using  ( does ; from-yes )
 
--- Imports from the Agda Universal Algebra Library
-open import Classical.Structures.Group.Subgroups   using ( DecSubgroup )
-open import Classical.Structures.Group.TableGroup  using ( _⨁_ )
+-- Imports from agda-algebras ----------------------------------------------------
+open import Classical.Structures.Group  using  ( DecSubgroup ; _⨁_ )
 open import Examples.Classical.Groups.AlternatingGroup5
-                                                   using ( a5-group )
-open import Examples.Classical.Groups.CyclicGroup3 using ( z3-table )
-open import Examples.Classical.Groups.CyclicGroup6 using ( z6-table )
+                                        using  ( a5-group )
+open import Examples.Classical.Groups.CyclicGroup3
+                                        using  ( z3-table )
+open import Examples.Classical.Groups.CyclicGroup6
+                                        using  ( z6-table )
 open import Examples.Classical.Groups.SymmetricGroup3
-                                                   using ( _·_ ; s3-inv )
-open import Overture.Operations.Properties         using ( LeftIdentity? ; RightIdentity? ; LeftInverse?
-                                                         ; RightInverse? )
+                                        using  ( _·_ ; s3-inv )
+open import Overture.Operations.Properties
+                                        using  ( LeftIdentity? ; RightIdentity?
+                                               ; LeftInverse? ; RightInverse? )
 
--- Imports from this library
-open import Groups.Cyclic                          using ( ℤ/_ ; _+ₘ_ ; -ₘ_ ; 1ₘ )
-open import Groups.Examples.Small                  using ( v4 ; z2 ; z3 ; z6 ; s3 ; a5 )
-open import Groups.Finite.Group                    using ( FiniteGroup )
-open import Groups.Subgroup                        using ( module Subgroups )
-open import Groups.Subgroup.Generated              using ( module Generated )
-open import Groups.Subgroup.Group                  using ( module AsGroup )
-open import Groups.Subgroup.Notions                using ( module Notions )
-open import Groups.Table                           using ( FinGroup ; module Retabulation ; module TableGroup )
+-- Imports from agda-groups ------------------------------------------------------
+open import Groups.Cyclic              using  ( ℤ/_ ; _+ₘ_ ; -ₘ_ ; 1ₘ )
+open import Groups.Examples.Small      using  ( v4 ; z2 ; z3 ; z6 ; s3 ; a5 )
+open import Groups.Finite.Group        using  ( FiniteGroup )
+open import Groups.Subgroup            using  ( module Subgroups )
+open import Groups.Subgroup.Generated  using  ( module Generated )
+open import Groups.Subgroup.Group      using  ( module AsGroup )
+open import Groups.Subgroup.Notions    using  ( module Notions )
+open import Groups.Table               using  ( FinGroup ; module Retabulation
+                                              ; module TableGroup )
 
 open FiniteGroup using ( order )
 ```
@@ -80,9 +85,11 @@ module Examples where
   orders = refl
 
   -- The same, counted.
-  counted : Subgroups.∣_∣ v4 (Subgroups.whole v4 0ℓ) ∷ Subgroups.∣_∣ z6 (Subgroups.whole z6 0ℓ)
-            ∷ Subgroups.∣_∣ s3 (Subgroups.whole s3 0ℓ) ∷ Subgroups.∣_∣ a5 (Subgroups.whole a5 0ℓ) ∷ []
-          ≡ 4 ∷ 6 ∷ 6 ∷ 60 ∷ []
+  counted :  Subgroups.∣_∣ v4 (Subgroups.whole v4 0ℓ) ∷
+             Subgroups.∣_∣ z6 (Subgroups.whole z6 0ℓ) ∷
+             Subgroups.∣_∣ s3 (Subgroups.whole s3 0ℓ) ∷
+             Subgroups.∣_∣ a5 (Subgroups.whole a5 0ℓ) ∷ []
+             ≡ 4 ∷ 6 ∷ 6 ∷ 60 ∷ []
   counted = refl
 
   -- A₅'s group is the Agda Universal Algebra Library's.
@@ -109,10 +116,16 @@ seconds.)
 module S₃-table where
   -- The element i of S₃ as the vector of its images.
   elt : Fin 6 → Vec (Fin 3) 3
-  elt = lookup ( (0F ∷ᵛ 1F ∷ᵛ 2F ∷ᵛ []ᵛ) ∷ᵛ (1F ∷ᵛ 2F ∷ᵛ 0F ∷ᵛ []ᵛ) ∷ᵛ (2F ∷ᵛ 0F ∷ᵛ 1F ∷ᵛ []ᵛ)
-               ∷ᵛ (0F ∷ᵛ 2F ∷ᵛ 1F ∷ᵛ []ᵛ) ∷ᵛ (1F ∷ᵛ 0F ∷ᵛ 2F ∷ᵛ []ᵛ) ∷ᵛ (2F ∷ᵛ 1F ∷ᵛ 0F ∷ᵛ []ᵛ) ∷ᵛ []ᵛ )
+  elt = lookup  (    (0F ∷ᵛ 1F ∷ᵛ 2F ∷ᵛ []ᵛ)  -- e
+                  ∷ᵛ (1F ∷ᵛ 2F ∷ᵛ 0F ∷ᵛ []ᵛ)  -- r
+                  ∷ᵛ (2F ∷ᵛ 0F ∷ᵛ 1F ∷ᵛ []ᵛ)  -- r²
+                  ∷ᵛ (0F ∷ᵛ 2F ∷ᵛ 1F ∷ᵛ []ᵛ)  -- s
+                  ∷ᵛ (1F ∷ᵛ 0F ∷ᵛ 2F ∷ᵛ []ᵛ)  -- rs
+                  ∷ᵛ (2F ∷ᵛ 1F ∷ᵛ 0F ∷ᵛ []ᵛ)  -- r²s
+                  ∷ᵛ []ᵛ )
 
-  open TableGroup 6 3 elt _·_ s3-inv 0F using ( elt-inj? ; mul-hom? ; module Build )
+  open TableGroup 6 3 elt _·_ s3-inv 0F
+    using ( elt-inj? ; mul-hom? ; module Build )
 
   -- The action is faithful ...
   inj : ∀ i j → elt i ≡ elt j → i ≡ j
@@ -138,8 +151,10 @@ module S₃-table where
   invʳ : ∀ a → a · s3-inv a ≡ 0F
   invʳ = from-yes (RightInverse? _·_ 0F s3-inv)
 
-  open Build inj hom idˡ idʳ invˡ invʳ using ( finiteGroup ; chiPred ; chi-∙? ; chi-ε? ; chi-⁻¹? ; boolSubgroup )
-  open Subgroups finiteGroup using ( ∣_∣ )
+  open Build inj hom idˡ idʳ invˡ invʳ  using  ( finiteGroup ; chiPred ; chi-∙?
+                                               ; chi-ε? ; chi-⁻¹?
+                                               ; boolSubgroup )
+  open Subgroups finiteGroup            using  ( ∣_∣ )
 
   -- S₃, built from its action, of order 6.
   order-S₃ : order finiteGroup ≡ 6
@@ -184,11 +199,11 @@ module Cyclic where
   orders = refl
 
   -- The table of ℤ/3 is agda-algebras' ...
-  table₃ : tabulate (λ (a : Fin 3) → tabulate (λ b → a +ₘ b)) ≡ z3-table
+  table₃ : tabulate (λ (a : Fin 3) → tabulate (a +ₘ_)) ≡ z3-table
   table₃ = refl
 
   -- ... and so is the table of ℤ/6.
-  table₆ : tabulate (λ (a : Fin 6) → tabulate (λ b → a +ₘ b)) ≡ z6-table
+  table₆ : tabulate (λ (a : Fin 6) → tabulate (a +ₘ_)) ≡ z6-table
   table₆ = refl
 
   -- In ℤ/7, −3 = 4 ...
@@ -199,9 +214,9 @@ module Cyclic where
   power : Notions._^ⁿ_ (ℤ/ 7) 1ₘ 5 ≡ 5F
   power = refl
 
-  open Generated (ℤ/ 6) using ( Generators ; mkGenerators ; ⟨_⟩ )
-  open Subgroups (ℤ/ 6) using ( ∣_∣ )
-  open Notions (ℤ/ 6)   using ( isAbelian? )
+  open Generated (ℤ/ 6)  using  ( Generators ; mkGenerators ; ⟨_⟩ )
+  open Subgroups (ℤ/ 6)  using  ( ∣_∣ )
+  open Notions (ℤ/ 6)    using  ( isAbelian? )
 
   -- ⟨1⟩, ⟨2⟩ and ⟨3⟩ in ℤ/6.
   𝔾₁ 𝔾₂ 𝔾₃ : Generators
@@ -227,8 +242,8 @@ of ℤ/3.
 
 ```agda
 module Retabulated where
-  open Generated s3 using ( Generators ; mkGenerators ; ⟨_⟩ )
-  open AsGroup s3   using ( asFiniteGroup )
+  open Generated s3  using  ( Generators ; mkGenerators ; ⟨_⟩ )
+  open AsGroup s3    using  ( asFiniteGroup )
 
   -- A₃ = ⟨r⟩ in S₃.
   𝔸₃ : Generators
@@ -241,6 +256,6 @@ module Retabulated where
   open Retabulation A₃ using ( retabulate )
 
   -- Re-tabulated, it has the table of ℤ/3.
-  table : tabulate (λ a → tabulate (λ b → FinGroup.mul retabulate a b)) ≡ z3-table
+  table : tabulate (λ a → tabulate (FinGroup.mul retabulate a)) ≡ z3-table
   table = refl
 ```

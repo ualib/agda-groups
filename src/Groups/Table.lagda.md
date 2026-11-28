@@ -45,30 +45,37 @@ Two constructions, as follows:
 
 module Groups.Table where
 
--- Imports from the Agda Standard Library
-open import Agda.Primitive                         using () renaming ( Set to Type )
-open import Data.Fin.Base                          using ( Fin )
-open import Data.Nat.Base                          using ( ℕ )
-open import Data.Product.Base                      using ( _,_ ; proj₁ ; proj₂ )
-open import Data.Vec.Base                          using ( Vec )
-open import Function.Bundles                       using ( Func )
-open import Level                                  using ( Level ; 0ℓ )
-open import Relation.Binary.Bundles                using ( Setoid )
-open import Relation.Binary.PropositionalEquality  using ( _≡_ ; refl ; trans ; cong )
-                                                   renaming ( setoid to ≡-setoid )
+open import Agda.Primitive using () renaming ( Set to Type )
 
--- Imports from the Agda Universal Algebra Library
-open import Classical.Structures.Group.Basic       using ( Group ; module Group-Op ; opsToBareGroup ; _⊨ᵍᵖ_
-                                                         ; eqsToGroup )
-open import Classical.Structures.Group.TableGroup  using ( _⨁_ ; module TableGroupBuilder )
-open import Classical.Theories.Group               using ( Th-Group )
-open import Setoid.Algebras.Basic                  using ( Algebra )
-open import Setoid.Algebras.Finite.Irredundant     using ( IrredundantEnumeration )
-open import Setoid.Homomorphisms.Isomorphisms      using ( _≅_ )
+-- Imports from agda-stdlib ----------------------------------------------------
+open import Data.Fin.Base            using  ( Fin )
+open import Data.Nat.Base            using  ( ℕ )
+open import Data.Product.Base        using  ( _,_ ; proj₁ ; proj₂ )
+open import Data.Vec.Base            using  ( Vec )
+open import Function.Base            using  ( id )
+open import Function.Bundles         using  ( Func )
+open import Level                    using  ( Level ; 0ℓ )
+open import Relation.Binary.Bundles  using  ( Setoid )
+open import Relation.Binary.PropositionalEquality
+                                     using  ( _≡_ ; refl ; trans )
+                                     renaming ( setoid to ≡-setoid )
 
--- Imports from this library
-open import Groups.Finite.Group                    using ( FiniteGroup )
-open import Groups.Homomorphism                    using ( module Homomorphisms ; module Isomorphisms )
+-- Imports from agda-algebras ----------------------------------------------------
+open import Classical.Structures.Group  using  ( Group ; module Group-Op
+                                               ; opsToBareGroup ; _⊨ᵍᵖ_
+                                               ; eqsToGroup ; _⨁_
+                                               ; module TableGroupBuilder )
+open import Classical.Theories.Group    using  ( Th-Group )
+open import Setoid.Algebras.Basic       using  ( Algebra )
+open import Setoid.Algebras.Finite.Irredundant
+                                        using  ( IrredundantEnumeration )
+open import Setoid.Homomorphisms.Isomorphisms
+                                        using  ( _≅_ )
+
+-- Imports from agda-groups ------------------------------------------------------
+open import Groups.Finite.Group  using  ( FiniteGroup )
+open import Groups.Homomorphism  using  ( module Homomorphisms
+                                        ; module Isomorphisms )
 
 private variable α ρ : Level
 ```
@@ -104,7 +111,10 @@ record FinGroup : Type where
 
   -- The identity enumeration of Fin n.
   irredundant : IrredundantEnumeration algebra
-  irredundant = record { icard = n ; ienum[_] = λ i → i ; ienum-sur = λ x → x , refl ; ienum-inj = λ e → e }
+  irredundant = record  { icard = n
+                        ; ienum[_] = id
+                        ; ienum-sur = λ x → x , refl
+                        ; ienum-inj = id }
 
   -- The finite group, with the identity enumeration.
   finiteGroup : FiniteGroup 0ℓ 0ℓ
@@ -122,11 +132,13 @@ whose group is 𝒢 itself, up to Agda's own equality of records, so that
 library's theorems about 𝒢 apply to it unchanged.
 
 ```agda
--- A group built on Fin n, as a finite group with the identity enumeration, from its laws.
-onFin : {n : ℕ} {mul : Fin n → Fin n → Fin n} {unit : Fin n} {inv : Fin n → Fin n}
+-- A group built on Fin n, as a finite group with the identity enumeration,
+-- from its laws.
+onFin : {n : ℕ} {mul : Fin n → Fin n → Fin n} {unit : Fin n}
+        {inv : Fin n → Fin n}
   → opsToBareGroup mul unit inv ⊨ᵍᵖ Th-Group → FiniteGroup 0ℓ 0ℓ
-onFin {n} {mul} {unit} {inv} laws =
-  FinGroup.finiteGroup (record { n = n ; mul = mul ; unit = unit ; inv = inv ; laws = laws })
+onFin {n} {mul} {unit} {inv} laws = FinGroup.finiteGroup record
+  { n = n ; mul = mul ; unit = unit ; inv = inv ; laws = laws }
 ```
 
 A group on `Fin n` is also given by its operations and the five group
@@ -135,14 +147,15 @@ laws as equations, the arguments of the Agda Universal Algebra Library's
 
 ```agda
 -- A group on Fin n from its operations and the five group laws.
-fromEqs : (n : ℕ) (mul : Fin n → Fin n → Fin n) (unit : Fin n) (inv : Fin n → Fin n)
+fromEqs : (n : ℕ) (mul : Fin n → Fin n → Fin n) (unit : Fin n)
+          (inv : Fin n → Fin n)
   → (∀ a b c → mul (mul a b) c ≡ mul a (mul b c))
   → (∀ a → mul unit a ≡ a) → (∀ a → mul a unit ≡ a)
   → (∀ a → mul (inv a) a ≡ unit) → (∀ a → mul a (inv a) ≡ unit)
   → FinGroup
 fromEqs n mul unit inv assoc idˡ idʳ invˡ invʳ = record
   { n = n ; mul = mul ; unit = unit ; inv = inv
-  ; laws = proj₂ (eqsToGroup mul unit inv assoc idˡ idʳ invˡ invʳ) }
+  ; laws = eqsToGroup mul unit inv assoc idˡ idʳ invˡ invʳ .proj₂ }
 ```
 
 #### Re-tabulation
@@ -161,20 +174,31 @@ module Retabulation (𝔾 : FiniteGroup α ρ) where
     𝒢 : Group α ρ
     𝒢 = FiniteGroup.group 𝔾
 
-  open FiniteGroup 𝔾  using ( setoid ; order ; enum ; idx ; enum-idx ; idx-cong ; idx-enum )
-  open Setoid setoid  using ( _≈_ ) renaming ( refl to ≈refl ; sym to ≈sym ; trans to ≈trans )
-  open Group-Op 𝒢     using ( _∙_ ; ε ; _⁻¹ ; ∙-cong ; assoc-law ; idˡ-law ; idʳ-law ; invˡ-law ; invʳ-law )
+  open FiniteGroup 𝔾  using  ( setoid ; order ; enum ; idx ; enum-idx ; idx-cong
+                             ; idx-enum )
+  open Setoid setoid  using  ( _≈_ )
+                      renaming ( refl to ≈refl ; sym to ≈sym ; trans to ≈trans )
+  open Group-Op 𝒢     using  ( _∙_ ; ε ; _⁻¹ ; ∙-cong ; assoc-law ; idˡ-law
+                             ; idʳ-law ; invˡ-law ; invʳ-law )
 ```
 -->
 
 ```agda
   -- The group on Fin |G| through the enumeration.
   retabulate : FinGroup
-  retabulate = fromEqs order (λ a b → idx (enum a ∙ enum b)) (idx ε) (λ a → idx (enum a ⁻¹))
-    (λ a b c → idx-cong (≈trans (∙-cong (enum-idx _) ≈refl)
-                         (≈trans (assoc-law _ _ _) (∙-cong ≈refl (≈sym (enum-idx _))))))
-    (λ a → trans (idx-cong (≈trans (∙-cong (enum-idx ε) ≈refl) (idˡ-law (enum a)))) (idx-enum a))
-    (λ a → trans (idx-cong (≈trans (∙-cong ≈refl (enum-idx ε)) (idʳ-law (enum a)))) (idx-enum a))
+  retabulate = fromEqs order
+    (λ a b → idx (enum a ∙ enum b))
+    (idx ε)
+    (λ a → idx (enum a ⁻¹))
+    (λ _ _ _ → idx-cong (≈trans  (∙-cong (enum-idx _) ≈refl)
+                                 (≈trans  (assoc-law _ _ _)
+                                          (∙-cong ≈refl (≈sym (enum-idx _))))))
+    (λ a → trans  (idx-cong (≈trans  (∙-cong (enum-idx ε) ≈refl)
+                                     (idˡ-law (enum a))))
+                  (idx-enum a))
+    (λ a → trans  (idx-cong (≈trans  (∙-cong ≈refl (enum-idx ε))
+                                     (idʳ-law (enum a))))
+                  (idx-enum a))
     (λ a → idx-cong (≈trans (∙-cong (enum-idx _) ≈refl) (invˡ-law (enum a))))
     (λ a → idx-cong (≈trans (∙-cong ≈refl (enum-idx _)) (invʳ-law (enum a))))
 
@@ -192,7 +216,8 @@ module Retabulation (𝔾 : FiniteGroup α ρ) where
 
   -- The re-tabulated group is isomorphic to G, by the enumeration.
   retabulate-≅ : FinGroup.algebra retabulate ≅ FiniteGroup.algebra 𝔾
-  retabulate-≅ = Isomorphisms.groupIso (FinGroup.group retabulate) 𝒢 enumᶠ idxᶠ enum-∙ enum-idx idx-enum
+  retabulate-≅ = Isomorphisms.groupIso  (FinGroup.group retabulate) 𝒢
+                                        enumᶠ idxᶠ enum-∙ enum-idx idx-enum
 ```
 
 #### Table groups
@@ -211,23 +236,32 @@ subgroup, `boolSubgroup chi c∙ cε c⁻¹`, is a decidable subgroup of
 
 ```agda
 -- The Agda Universal Algebra Library's table groups, as finite groups.
-module TableGroup (n d : ℕ) (elt : Fin n → Vec (Fin d) d) (mul : Fin n → Fin n → Fin n)
-                  (inv : Fin n → Fin n) (e : Fin n) where
+module TableGroup
+  (n d  : ℕ)
+  (elt  : Fin n → Vec (Fin d) d)
+  (mul  : Fin n → Fin n → Fin n)
+  (inv  : Fin n → Fin n)
+  (e    : Fin n)
+  where
   open TableGroupBuilder n d elt mul inv e public using ( elt-inj? ; mul-hom? )
 
-  module Build (inj   : ∀ i j → elt i ≡ elt j → i ≡ j)
-               (hom   : ∀ i j → elt (mul i j) ≡ elt i ⨁ elt j)
-               (idˡ   : ∀ a → mul e a ≡ a)
-               (idʳ   : ∀ a → mul a e ≡ a)
-               (invˡ  : ∀ a → mul (inv a) a ≡ e)
-               (invʳ  : ∀ a → mul a (inv a) ≡ e)
-               where
-    open TableGroupBuilder.Build n d elt mul inv e inj hom idˡ idʳ invˡ invʳ public
-      using ( mul-assoc ; theGroup ; theGroup-FiniteAlgebra ; chiPred ; chi-∙? ; chi-ε? ; chi-⁻¹? ; boolSubgroup )
+  module Build
+    (inj   : ∀ i j → elt i ≡ elt j → i ≡ j)
+    (hom   : ∀ i j → elt (mul i j) ≡ elt i ⨁ elt j)
+    (idˡ   : ∀ a → mul e a ≡ a)
+    (idʳ   : ∀ a → mul a e ≡ a)
+    (invˡ  : ∀ a → mul (inv a) a ≡ e)
+    (invʳ  : ∀ a → mul a (inv a) ≡ e)
+    where
+    open TableGroupBuilder.Build
+      n d elt mul inv e inj hom idˡ idʳ invˡ invʳ public
+      using  ( mul-assoc ; theGroup ; theGroup-FiniteAlgebra ; chiPred
+             ; chi-∙? ; chi-ε? ; chi-⁻¹? ; boolSubgroup )
 
     -- The table group on Fin n.
     finGroup : FinGroup
-    finGroup = record { n = n ; mul = mul ; unit = e ; inv = inv ; laws = proj₂ theGroup }
+    finGroup = record  { n = n ; mul = mul ; unit = e ; inv = inv
+                       ; laws = proj₂ theGroup }
 
     -- The table group, as a finite group with the identity enumeration.
     finiteGroup : FiniteGroup 0ℓ 0ℓ

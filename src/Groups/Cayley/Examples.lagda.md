@@ -24,24 +24,26 @@ the comments in cycle notation.
 
 module Groups.Cayley.Examples where
 
--- Imports from the Agda Standard Library
-open import Data.Bool.Base                         using ( true ; false )
-open import Data.Fin.Patterns                      using ( 0F ; 1F ; 2F ; 3F ; 4F ; 5F )
-open import Data.Product.Base                      using ( proj₁ )
-open import Data.Vec.Base                          using ()
-                                                   renaming ( [] to []ᵛ ; _∷_ to infixr 5 _∷ᵛ_ )
-open import Relation.Binary.PropositionalEquality  using ( _≡_ ; refl )
-open import Relation.Nullary.Decidable             using ( does )
+-- Imports from agda-stdlib ----------------------------------------------------
+open import Data.Bool.Base              using  ( true ; false )
+open import Data.Fin.Patterns           using  ( 0F ; 1F ; 2F ; 3F ; 4F ; 5F )
+open import Data.Product.Base           using  ( proj₁ )
+open import Data.Vec.Base               using  ()
+                                        renaming ( [] to []ᵛ
+                                                 ; _∷_ to infixr 5 _∷ᵛ_ )
+open import Relation.Binary.PropositionalEquality
+                                        using  ( _≡_ ; refl )
+open import Relation.Nullary.Decidable  using  ( does )
 
--- Imports from the Agda Universal Algebra Library
-open import Examples.Classical.Groups.AlternatingGroup5
-                                                   using ( _·_ )
+-- Imports from agda-algebras ----------------------------------------------------
+open import Examples.Classical.Groups.AlternatingGroup5 using ( _·_ )
 
--- Imports from this library
-open import Groups.Cayley                          using ( module Cayley ; cayley )
-open import Groups.Examples.Small                  using ( v4 ; s3 ; a5 ; a5-s ; a5-t )
-open import Groups.Subgroup                        using ( module Subgroups )
-open import Groups.Symmetric                       using ( images ; fromImages ; _∘ₚ_ ; Sym )
+-- Imports from agda-groups ------------------------------------------------------
+open import Groups.Cayley          using  ( module Cayley ; cayley )
+open import Groups.Examples.Small  using  ( v4 ; s3 ; a5 ; a5-s ; a5-t )
+open import Groups.Subgroup        using  ( module Subgroups )
+open import Groups.Symmetric       using  ( Perm ; images ; fromImages ; _∘ₚ_
+                                          ; Sym )
 ```
 -->
 
@@ -59,11 +61,12 @@ module V₄ where
   λ₁ = refl
 
   -- The image, Cayley's subgroup for V₄, has order 4.
-  order-image : Subgroups.∣_∣ (Sym 4) (proj₁ (cayley v4)) ≡ 4
+  order-image : Subgroups.∣_∣ (Sym 4) (cayley v4 .proj₁) ≡ 4
   order-image = refl
 
   -- (0 1) is not in the image.
-  not-in-image : does (inImage? (fromImages (1F ∷ᵛ 0F ∷ᵛ 2F ∷ᵛ 3F ∷ᵛ []ᵛ) refl refl)) ≡ false
+  not-in-image :
+    does (inImage? (fromImages (1F ∷ᵛ 0F ∷ᵛ 2F ∷ᵛ 3F ∷ᵛ []ᵛ) refl refl)) ≡ false
   not-in-image = refl
 ```
 
@@ -86,10 +89,14 @@ module S₃ where
   λs : images (leftRegular 3F) ≡ 3F ∷ᵛ 5F ∷ᵛ 4F ∷ᵛ 0F ∷ᵛ 2F ∷ᵛ 1F ∷ᵛ []ᵛ
   λs = refl
 
+  -- (0 1), a permutation of the six indices.
+  t : Perm 6
+  t = fromImages (1F ∷ᵛ 0F ∷ᵛ 2F ∷ᵛ 3F ∷ᵛ 4F ∷ᵛ 5F ∷ᵛ []ᵛ) refl refl
+
   -- λ(r) λ(s) is in the image, and (0 1) is not.
-  membership : does (inImage? (leftRegular 1F ∘ₚ leftRegular 3F))
-             ∷ᵛ does (inImage? (fromImages (1F ∷ᵛ 0F ∷ᵛ 2F ∷ᵛ 3F ∷ᵛ 4F ∷ᵛ 5F ∷ᵛ []ᵛ) refl refl)) ∷ᵛ []ᵛ
-             ≡ true ∷ᵛ false ∷ᵛ []ᵛ
+  membership :  does (inImage? (leftRegular 1F ∘ₚ leftRegular 3F)) ∷ᵛ
+                does (inImage? t) ∷ᵛ []ᵛ
+                ≡ true ∷ᵛ false ∷ᵛ []ᵛ
   membership = refl
 ```
 
@@ -108,7 +115,8 @@ module A₅ where
   readOff-s = refl
 
   -- λ(s t) = λ(s) λ(t).
-  homomorphism : images (leftRegular (a5-s · a5-t)) ≡ images (leftRegular a5-s ∘ₚ leftRegular a5-t)
+  homomorphism :  images (leftRegular (a5-s · a5-t))
+                  ≡ images (leftRegular a5-s ∘ₚ leftRegular a5-t)
   homomorphism = refl
 
   -- λ(s) λ(t) is in the image.

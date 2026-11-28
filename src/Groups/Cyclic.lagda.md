@@ -29,20 +29,25 @@ division and remainder take, and which its primes supply.
 
 module Groups.Cyclic where
 
--- Imports from the Agda Standard Library
-open import Data.Fin.Base                          using ( Fin ; toℕ )
-open import Data.Fin.Properties                    using ( toℕ-injective ; toℕ<n ; toℕ-fromℕ< )
-open import Data.Nat.Base                          using ( ℕ ; suc ; _+_ ; _∸_ ; _%_ ; NonZero ; >-nonZero⁻¹ )
-open import Data.Nat.DivMod                        using ( _mod_ ; m%n<n ; m%n%n≡m%n ; %-distribˡ-+ ; m<n⇒m%n≡m
-                                                         ; n%n≡0 )
-open import Data.Nat.Properties                    using ( +-assoc ; +-comm ; m∸n+n≡m ; <⇒≤ )
-open import Level                                  using ( 0ℓ )
-open import Relation.Binary.PropositionalEquality  using ( _≡_ ; refl ; sym ; trans ; cong ; cong₂ )
+-- Imports from agda-stdlib ----------------------------------------------------
+open import Data.Fin.Base        using  ( Fin ; toℕ )
+open import Data.Fin.Properties  using  ( toℕ-injective ; toℕ<n ; toℕ-fromℕ< )
+open import Data.Nat.Base        using  ( ℕ ; suc ; _+_ ; _∸_ ; _%_ ; NonZero
+                                        ; >-nonZero⁻¹ )
+open import Data.Nat.DivMod      using  ( _mod_ ; m%n<n ; m%n%n≡m%n ; n%n≡0
+                                        ; %-distribˡ-+ ; m<n⇒m%n≡m )
+open import Data.Nat.Properties  using  ( +-assoc ; +-comm ; m∸n+n≡m ; <⇒≤ )
+open import Level                using  ( 0ℓ )
+open import Relation.Binary.PropositionalEquality
+                                 using  ( _≡_ ; refl ; sym ; trans ; cong
+                                        ; cong₂ ; module ≡-Reasoning )
 
--- Imports from this library
-open import Groups.Finite.Group                    using ( FiniteGroup )
-open import Groups.Subgroup.Notions                using ( module Notions )
-open import Groups.Table                           using ( FinGroup ; fromEqs )
+-- Imports from agda-groups ------------------------------------------------------
+open import Groups.Finite.Group      using  ( FiniteGroup )
+open import Groups.Subgroup.Notions  using  ( module Notions )
+open import Groups.Table             using  ( FinGroup ; fromEqs )
+
+open ≡-Reasoning using ( begin_ ; step-≡-⟩ ; step-≡-⟨ ; _∎ )
 ```
 -->
 
@@ -62,17 +67,22 @@ module _ {n : ℕ} .{{_ : NonZero n}} where
 
   -- Numbers congruent modulo n have the same remainder.
   mod-≡ : ∀ {x y} → x % n ≡ y % n → x mod n ≡ y mod n
-  mod-≡ {x} {y} e = toℕ-injective (trans (toℕ-mod x) (trans e (sym (toℕ-mod y))))
+  mod-≡ {x} {y} e =
+    toℕ-injective (trans (toℕ-mod x) (trans e (sym (toℕ-mod y))))
 
   -- A remainder may be taken inside a sum, on the left ...
   %-+ˡ : ∀ x y → (x % n + y) % n ≡ (x + y) % n
-  %-+ˡ x y = trans (%-distribˡ-+ (x % n) y n)
-               (trans (cong (λ z → (z + y % n) % n) (m%n%n≡m%n x n)) (sym (%-distribˡ-+ x y n)))
+  %-+ˡ x y =
+    trans  (%-distribˡ-+ (x % n) y n)
+           (trans  (cong (λ z → (z + y % n) % n) (m%n%n≡m%n x n))
+                   (sym (%-distribˡ-+ x y n)))
 
   -- ... and on the right.
   %-+ʳ : ∀ x y → (x + y % n) % n ≡ (x + y) % n
-  %-+ʳ x y = trans (%-distribˡ-+ x (y % n) n)
-               (trans (cong (λ z → (x % n + z) % n) (m%n%n≡m%n y n)) (sym (%-distribˡ-+ x y n)))
+  %-+ʳ x y =
+    trans  (%-distribˡ-+ x (y % n) n)
+           (trans  (cong (λ z → (x % n + z) % n) (m%n%n≡m%n y n))
+                   (sym (%-distribˡ-+ x y n)))
 
   -- An element of Fin n is its own remainder.
   toℕ-% : (a : Fin n) → toℕ a % n ≡ toℕ a
@@ -112,11 +122,17 @@ the values of the two sides modulo n.
 
   -- Addition is associative ...
   +ₘ-assoc : ∀ a b c → (a +ₘ b) +ₘ c ≡ a +ₘ (b +ₘ c)
-  +ₘ-assoc a b c = mod-≡ (trans (cong (λ z → (z + toℕ c) % n) (toℕ-mod (toℕ a + toℕ b)))
-                          (trans (%-+ˡ (toℕ a + toℕ b) (toℕ c))
-                          (trans (cong (_% n) (+-assoc (toℕ a) (toℕ b) (toℕ c)))
-                          (trans (sym (%-+ʳ (toℕ a) (toℕ b + toℕ c)))
-                                 (cong (λ z → (toℕ a + z) % n) (sym (toℕ-mod (toℕ b + toℕ c))))))))
+  +ₘ-assoc a b c = mod-≡ (begin
+    (toℕ (a +ₘ b) + c′) % n   ≡⟨ cong (λ z → (z + c′) % n) (toℕ-mod (a′ + b′)) ⟩
+    ((a′ + b′) % n + c′) % n  ≡⟨ %-+ˡ (a′ + b′) c′ ⟩
+    (a′ + b′ + c′) % n        ≡⟨ cong (_% n) (+-assoc a′ b′ c′) ⟩
+    (a′ + (b′ + c′)) % n      ≡⟨ %-+ʳ a′ (b′ + c′) ⟨
+    (a′ + (b′ + c′) % n) % n  ≡⟨ cong (λ z → (a′ + z) % n) (toℕ-mod (b′ + c′)) ⟨
+    (a′ + toℕ (b +ₘ c)) % n   ∎)
+    where
+    a′ = toℕ a
+    b′ = toℕ b
+    c′ = toℕ c
 
   -- ... and commutative.
   +ₘ-comm : ∀ a b → a +ₘ b ≡ b +ₘ a
@@ -124,8 +140,10 @@ the values of the two sides modulo n.
 
   -- Zero is an identity on the left ...
   +ₘ-identityˡ : ∀ a → 0ₘ +ₘ a ≡ a
-  +ₘ-identityˡ a = toℕ-injective (trans (toℕ-mod (toℕ 0ₘ + toℕ a))
-                                   (trans (cong (λ z → (z + toℕ a) % n) toℕ-0ₘ) (toℕ-% a)))
+  +ₘ-identityˡ a =
+    toℕ-injective (trans  (toℕ-mod (toℕ 0ₘ + toℕ a))
+                          (trans  (cong (λ z → (z + toℕ a) % n) toℕ-0ₘ)
+                                  (toℕ-% a)))
 
   -- ... and on the right.
   +ₘ-identityʳ : ∀ a → a +ₘ 0ₘ ≡ a
@@ -133,10 +151,11 @@ the values of the two sides modulo n.
 
   -- Negation is an inverse on the left ...
   +ₘ-inverseˡ : ∀ a → -ₘ a +ₘ a ≡ 0ₘ
-  +ₘ-inverseˡ a = mod-≡ (trans (cong (λ z → (z + toℕ a) % n) (toℕ-mod (n ∸ toℕ a)))
-                         (trans (%-+ˡ (n ∸ toℕ a) (toℕ a))
-                         (trans (cong (_% n) (m∸n+n≡m (<⇒≤ (toℕ<n a))))
-                         (trans (n%n≡0 n) (sym 0%n)))))
+  +ₘ-inverseˡ a =
+    mod-≡ (trans  (cong (λ z → (z + toℕ a) % n) (toℕ-mod (n ∸ toℕ a)))
+                  (trans  (%-+ˡ (n ∸ toℕ a) (toℕ a))
+                          (trans  (cong (_% n) (m∸n+n≡m (<⇒≤ (toℕ<n a))))
+                                  (trans (n%n≡0 n) (sym 0%n)))))
 
   -- ... and on the right.
   +ₘ-inverseʳ : ∀ a → a +ₘ -ₘ a ≡ 0ₘ
@@ -148,7 +167,8 @@ the values of the two sides modulo n.
 ```agda
 -- ℤ/n as a group on Fin n.
 cyclic : (n : ℕ) .{{_ : NonZero n}} → FinGroup
-cyclic n = fromEqs n _+ₘ_ 0ₘ -ₘ_ +ₘ-assoc +ₘ-identityˡ +ₘ-identityʳ +ₘ-inverseˡ +ₘ-inverseʳ
+cyclic n = fromEqs  n _+ₘ_ 0ₘ -ₘ_
+                    +ₘ-assoc +ₘ-identityˡ +ₘ-identityʳ +ₘ-inverseˡ +ₘ-inverseʳ
 
 infix 8 ℤ/_
 
@@ -176,9 +196,10 @@ module _ {n : ℕ} .{{_ : NonZero n}} where
   -- The power 1ᵏ has the value k % n ...
   toℕ-1^ⁿ : ∀ k → toℕ (1ₘ ^ⁿ k) ≡ k % n
   toℕ-1^ⁿ 0        = trans toℕ-0ₘ (sym 0%n)
-  toℕ-1^ⁿ (suc k)  = trans (toℕ-mod (toℕ 1ₘ + toℕ (1ₘ ^ⁿ k)))
-                       (trans (cong₂ (λ x y → (x + y) % n) (toℕ-mod 1) (toℕ-1^ⁿ k))
-                       (trans (%-+ˡ 1 (k % n)) (%-+ʳ 1 k)))
+  toℕ-1^ⁿ (suc k)  =
+    trans  (toℕ-mod (toℕ 1ₘ + toℕ (1ₘ ^ⁿ k)))
+           (trans  (cong₂ (λ x y → (x + y) % n) (toℕ-mod 1) (toℕ-1^ⁿ k))
+                   (trans (%-+ˡ 1 (k % n)) (%-+ʳ 1 k)))
 
   -- ... so every element a is the power 1ᵃ: ℤ/n is generated by 1.
   1^ⁿ-toℕ : (a : Fin n) → 1ₘ ^ⁿ toℕ a ≡ a
